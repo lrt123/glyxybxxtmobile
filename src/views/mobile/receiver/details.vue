@@ -421,7 +421,7 @@
       /**
        * 读取接口
        */
-      fetchData(id) {
+      fetchData: function (id) {
         this.toast = this.$toast({
           type: 'loading',
           message: '加载中',
@@ -436,12 +436,14 @@
             this.bxdInfo = response.obj.blist[0]
             this.resetBxdInfo()
           }
-        }).catch(() => {
-          this.toast.clear()
-          this.$notify({
-            message: '该工单不存在或接口异常~',
-            className: 'my-notify error'
-          })
+        }).catch(err => {
+          if(!this.$route.params.id == undefined){
+            this.toast.clear()
+            this.$notify({
+              message: '该工单不存在或接口异常~',
+              className: 'my-notify error'
+            })
+          }
         })
       },
       /**

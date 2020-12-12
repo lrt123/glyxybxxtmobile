@@ -345,6 +345,15 @@
             break
           case 'bxlb':
             this.actions = config.repairCategory.map(item => {
+              switch (item) {
+                case 'wywx': item = '物业维修'; break;
+                case 'sdwx': item = '水电维修'; break;
+                case 'rswx': item = '热水维修'; break;
+                case 'jdwx': item = '家电维修'; break;
+                case 'ktwx': item = '空调维修'; break;
+                case 'qt': item = '其他'; break;
+              }
+              //然后根据这个item，请求后台字典，选择对应的具体维修地点
               return {name: item}
             })
             break
