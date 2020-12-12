@@ -75,7 +75,7 @@
         <div class="category">报修类别：{{ bxdInfo.bxlb }}</div>
         <div class="desc">内容：{{ bxdInfo.bxnr }}</div>
         <div class="img-grid">
-          <van-grid v-if="showType === 'img'" :column-num="3">
+          <van-grid v-show="img" :column-num="3">
             <van-grid-item
               class="img-grid-item"
               v-for="(src, index) in images"
@@ -85,9 +85,8 @@
               <van-image class="image" :src="src" fit="cover"/>
             </van-grid-item>
           </van-grid>
-          <div v-else-if="showType === 'vedio'" class="vedioBox">
-            <video width="320" height="200" controls>
-              <source :src="images" type="video/*">
+          <div v-show="video" class="videoBox">
+            <video width="320" height="200" controls :src="videoUrl" preload="auto">
               您的浏览器不支持Video标签。
             </video>
           </div>
@@ -351,7 +350,10 @@
     components: {noDataShow},
     data() {
       return {
-        showType: 'img', // img或vedio申报人上传的是图片还是视频
+        showType: 'img', // img或video申报人上传的是图片还是视频
+        img: false,
+        video: false,
+        videoUrl: '',
         popupShow: false, // 顶部弹出popup
         popupText: '',
         evaluateDialog: false, // 评论弹框
@@ -431,7 +433,7 @@
             })
           } else {
             this.$notify({ type: 'warning', message: '数据异常', duration: 1000 })
-          }          
+          }
         }).catch(err => {
           this.$notify({ type: 'error', message: '接口异常或网络中断', duration: 1000 })
         })
@@ -475,22 +477,21 @@
         const me = this
         const bxdInfo = this.bxdInfo
         // 提取报修图片
-        if (bxdInfo.tp.length > 0) {
-          let bxdimg = this.$store.getters.config.bxdimg
-          let tp = bxdInfo.tp
-          let firstCode = tp.charAt(0) // 读取第一个字符，是@代表申报人上传的是视频
-          if (firstCode === '@') { // 代表视频
-            this.showType = 'vedio'
-            this.images = `${bxdimg}/${tp}`
-          } else { // 代表图片
-            this.showType = 'img'
-            this.images = []
-            const arr = tp.split('|')
-            arr.shift()
-            this.images = arr.map(item => {
-              return `${bxdimg}/${item}`
-            })
-          }
+        let bxdimg = this.$store.getters.config.bxdimg
+        let tp = bxdInfo.tp
+        let sp = bxdInfo.sp
+        if (tp.trim() !== ''){
+          this.img = true
+          this.images = []
+          const arr = tp.split('|')
+          arr.shift()
+          this.images = arr.map(item => {
+            return `${bxdimg}/${item}`
+          })
+        }
+        if (sp.trim() !== ''){
+          this.video = true
+          this.videoUrl = `${bxdimg}/${sp}`
         }
 
         // 提取报修耗材
@@ -728,8 +729,8 @@
        */
       formatHc(hc) {
         if (!hc)
-          return        
-        hc = copyObj(hc)        
+          return
+        hc = copyObj(hc)
         if (this.hclist.length > 0) {
           let hcArr = hc.split('|') // 1-5  6-20
           this.hc = hcArr.map(v => {
@@ -1052,7 +1053,7 @@
         }
       }
 
-      .vedioBox {
+      .videoBox {
         width: 100%;
       }
 
