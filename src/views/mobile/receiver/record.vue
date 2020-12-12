@@ -76,7 +76,7 @@
           <div class="bid">编号：{{ item.id }}</div>
           <div class="date">
             <i class="el-icon-time"></i>
-            <span>{{ $moment(item.sbsj.time).format(format) }}</span>
+            <span>{{ $moment(item.sbsj).utcOffset(0).format(format) }}</span>
           </div>
           <div class="category">
             报修类别：{{ item.bxlb }}
@@ -313,8 +313,8 @@
           page: 1, // 第几页
           num: 30 // 多少条
         }).then(res => {
-          if (res && res.qlist) {
-            this.qdlist = res.qlist
+          if (res && res.obj.qlist) {
+            this.qdlist = res.obj.qlist
           } else {
             this.$notify({ type: 'error', message: '数据异常', duration: 1000 })
           }

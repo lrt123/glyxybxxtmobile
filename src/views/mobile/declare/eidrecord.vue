@@ -14,7 +14,7 @@
           <div class="bid">申报人：{{ item.sbr }}</div>
           <div class="date">
             <i class="el-icon-time"></i>
-            <span>{{ $moment(item.sbsj.time).format(format) }}</span>
+            <span>{{ $moment(item.sbsj).utcOffset(0).format(format) }}</span>
           </div>
           <div class="category">
             报修类别：{{ item.bxlb }}

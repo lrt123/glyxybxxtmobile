@@ -69,15 +69,32 @@
           <el-input v-model="submitBxdParams.sbrsj" type="tel" placeholder="填写本人手机号码"></el-input>
         </el-form-item>
         <el-form-item label="相关图片" prop="tp" class="tp-form-item">
-          <div class="label" slot="label">上传资料，请选择 
-            <van-dropdown-menu>
-              <van-dropdown-item v-model="submitType" @change="onSubmitTypeChange" :options="[
-                { text: '图片', value: 'img' },
-                { text: '视频', value: 'vedio' }
-              ]" />
-            </van-dropdown-menu></div>
-
-          <template v-if="submitType === 'vedio'">
+          <div class="label" slot="label">上传资料，请选择 图片
+            <!--<van-dropdown-menu>-->
+            <!--  <van-dropdown-item v-model="submitType" @change="onSubmitTypeChange" :options="[-->
+            <!--    { text: '图片', value: 'img' },-->
+            <!--    { text: '视频', value: 'vedio' }-->
+            <!--  ]" />-->
+            <!--</van-dropdown-menu>-->
+          </div>
+          <!--v-else-if="submitType === 'img'"-->
+          <van-uploader
+            v-model="uploadFiles"
+            multiple
+            accept="image/*"
+            :max-count="3"
+            :max-size="10 * 1024 * 1024"
+            upload-text="上传图片"
+            :before-read="beforeRead"
+            :after-read="afterRead"
+            @oversize="oversizeFile"
+            @delete="deleteFile"
+          />
+        </el-form-item>
+        <el-form-item label="相关视频" prop="tp" class="tp-form-item">
+          <div class="label" slot="label">上传资料，请选择 视频</div>
+          <!--v-if="submitType === 'vedio'"-->
+          <template>
             <form
               v-if="uploadend === false"
               class="form_vedio van-uploader__upload"
@@ -103,19 +120,6 @@
               <van-icon class="vedio-player__close" name="close" @click="uploadFileClear" />
             </div>
           </template>
-
-          <van-uploader
-            v-else-if="submitType === 'img'"
-            v-model="uploadFiles"
-            accept="image/*"
-            :max-count="3"
-            :max-size="10 * 1024 * 1024"
-            upload-text="上传图片"
-            :before-read="beforeRead"
-            :after-read="afterRead"
-            @oversize="oversizeFile"
-            @delete="deleteFile"
-          />
 
           <p class="tips">若不能上传请更新易班至最新版本</p>
         </el-form-item>
@@ -421,6 +425,7 @@
         this.$refs[formName].resetFields()
         this.clearyydateshow()
         this.deleteAllFiles()
+        this.uploadend = false
       },
       /**
        * 顶部提示，1.2s后自定隐藏
@@ -443,23 +448,15 @@
         const day = this.$moment(this.yydate, 'YYYY-MM-DD').day() // Number
         this.yyday = this.weeks[day]
       },
-      beforeRead(file) {
-        if (file.type.indexOf('image/') !== -1) {
-          this.toast = this.$toast({
-            type: 'loading',
-            message: '请稍后',
-            duration: 0
-          })
-          return true
-        } else {
-          this.$notify({
-            message: '仅限上传图片',
-            className: 'my-notify error'
-          })
-          return false
-        }
+      beforeRead() {
+        this.toast = this.$toast({
+          type: 'loading',
+          message: '请稍后',
+          duration: 2000
+        })
+        return true
       },
-      afterRead(file) {
+      upLoadFile(file) {
         compress(file.file, {
           type: 'file',
           compress: {
@@ -484,6 +481,15 @@
             this.submitBxdParams.tp = this.setParamsTp()
           }
         })
+      },
+      afterRead(file) {
+        if (file instanceof Array) {
+          file.forEach((item) => {
+            this.upLoadFile(item)
+          })
+        } else {
+          this.upLoadFile(file)
+        }
       },
       setParamsTp() {
         return this.uploadFilesCache.map(item => {
@@ -556,13 +562,13 @@
         if (window.FileReader) {
           var fr = new FileReader();
           fr.onloadend = function (e) {
-              var video = document.createElement("video");
-              video.controls = "controls";
-              video.src = e.target.result;
-              video.preload = 'auto'
-              video.width = 300;
-              video.height = 200;
-              document.getElementById("vedio-player").appendChild(video);
+            var video = document.createElement("video");
+            video.controls = "controls";
+            video.src = e.target.result;
+            video.preload = 'auto'
+            video.width = 300;
+            video.height = 200;
+            document.getElementById("vedio-player").appendChild(video);
           };
           fr.readAsDataURL(file);
         }
@@ -668,13 +674,13 @@
             box-shadow: none;
           }
         }
-        
+
       }
 
       .tips {
-          font-size: 26px;
-          color: #b5b5b5;
-        }
+        font-size: 26px;
+        color: #b5b5b5;
+      }
 
       .form_vedio {
 
@@ -682,7 +688,7 @@
           color: #dcdee0;
           font-size: 48px;
         }
-        
+
         input.value {
           display: none;
         }
