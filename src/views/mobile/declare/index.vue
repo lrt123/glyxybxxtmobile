@@ -23,7 +23,7 @@
         >
           <!--<router-link :to="`${detailPath}${item.id}`">-->
           <div class="bid">编号：{{ item.id }}</div>
-          <div class="date"><i class="el-icon-time"></i> <span>{{ $moment(item.sbsj.time).format(format) }}</span></div>
+          <div class="date"><i class="el-icon-time"></i> <span>{{ $moment(item.sbsj).format(format) }}</span></div>
           <div class="category">申报类别：{{ item.bxlb }}</div>
           <div class="state">{{ getState(item.state).text }}</div>
           <div class="indicator">{{ index + 1 }}/{{ swipeBlistLength }}</div>

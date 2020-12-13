@@ -106,7 +106,7 @@
           </div>
           <div class="container-item">
             <div class="container-item-left">申报时间：</div>
-            <div class="container-item-right">{{ bxdInfo.sbsj && $moment(bxdInfo.sbsj).utcOffset(0).format(format) }}</div>
+            <div class="container-item-right">{{ bxdInfo.sbsj && $moment(bxdInfo.sbsj).format(format) }}</div>
           </div>
           <div class="container-item">
             <div class="container-item-left">预约时间：</div>
@@ -168,7 +168,7 @@
             <div class="container-item">
               <div class="container-item-left">工时：</div>
               <div class="container-item-right orange-txt">
-                <span v-if="hc">{{gs}} <span class="unit">小时</span></span>
+                <span v-if="hc">{{gs}} </span>
                 <span v-else>--</span>
               </div>
             </div>
@@ -274,7 +274,7 @@
             <van-button class="button-add" type="primary" size="large" plain round @click.prevent="showHcList">点击添加耗材</van-button>
           </div>
         </div>
-        <div class="title">工时（小时）：</div>
+        <div class="title">工时：</div>
         <div class="desc" style="text-align: center;">
           <van-stepper v-model="gs" :min="0" step="0.1" input-width="150px" button-size="38px"/>
         </div>
@@ -529,7 +529,7 @@
         })
 
         function step1() {
-          const sbsj = me.$moment(me.bxdInfo.sbsj).utcOffset(0).format(me.format)
+          const sbsj = me.$moment(me.bxdInfo.sbsj).format(me.format)
           let desc = `<span class="name">${me.bxdInfo.sbr}</span>于${sbsj}提交了维修申报.`
           step.steps.push({
             title: '申报中',
@@ -550,7 +550,7 @@
           }
           step.steps.push({
             title: '维修中',
-            time: me.$moment(me.bxdInfo.sbsj).utcOffset(0).format(me.format),
+            time: me.$moment(me.bxdInfo.sbsj).format(me.format),
             desc: desc
           })
         }
@@ -558,7 +558,7 @@
         function step3() {
           step.steps.push({
             title: '已完成',
-            time: me.bxdInfo.wxsj ? me.$moment(me.bxdInfo.wxsj.time).format(me.format) : '--',
+            time: me.bxdInfo.wxsj ? me.$moment(me.bxdInfo.wxsj).format(me.format) : '--',
             desc: '维修工作已完成.'
           })
         }
@@ -566,7 +566,7 @@
         function step4() {
           step.steps.push({
             title: '已撤回',
-            time: me.bxdInfo.wxsj ? me.$moment(me.bxdInfo.wxsj.time).format(me.format) : '--',
+            time: me.bxdInfo.wxsj ? me.$moment(me.bxdInfo.wxsj).format(me.format) : '--',
             desc: '申报已撤回，原因：' + me.bxdInfo.cxsy + '.'
           })
         }

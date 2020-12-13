@@ -6,6 +6,7 @@
       </div>
       <div class="name">姓名：{{ authInfo.xm }}</div>
       <div class="student-id">工号：{{ authInfo.xh }}</div>
+      <van-button class="button-item btn-wysb" type="primary" size="normal" round @click.prevent="toMyDeclare()">我要申报</van-button>
     </div>
     <div class="main-header">
       <div class="title">工单记录</div>
@@ -54,7 +55,7 @@
                   <span class="custom-title">{{item.xq}}</span>
                 </template>
                 <template #extra>
-                  {{$moment(item.qdsj.time).format('YYYY-MM-DD HH:mm')}}
+                  {{$moment(item.qdsj).format('YYYY-MM-DD HH:mm')}}
                 </template>
               </van-cell>
             </van-dropdown-item>
@@ -74,7 +75,7 @@
           <div class="bid">编号：{{ item.id }}</div>
           <div class="date">
             <i class="el-icon-time"></i>
-            <span>{{ $moment(item.sbsj).utcOffset(0).format(format) }}</span>
+            <span>{{ $moment(item.sbsj).format(format) }}</span>
           </div>
           <div class="category">
             报修类别：{{ item.bxlb }}
@@ -100,6 +101,8 @@
   import { ShyServlet } from '@/api/ShyServlet'
   import { sortBxd } from '@/utils/common'
   import { mapGetters } from 'vuex'
+  import { auth } from '@/utils/auth'
+  import { setAuthInfo } from '@/utils/cookie'
 
   export default {
     name: 'CheckerRecord', // 审核员的工单记录
@@ -176,6 +179,36 @@
       next()
     },
     methods: {
+      /**
+       * 转换身份，进行申报
+       * */
+      toMyDeclare(){
+        let query = this.$route.query
+
+        // 学号或工号、身份、易班id三个参数必须存在才能通过授权
+        if (query.xh && query.sf && query.ybid) {
+          // 默认姓名和头像
+          // unescape 解析
+          query.xm =  unescape(query.xm.replace(/\\u/g, "%u")) || '路人甲'
+          query.head =  query.head || this.headimg
+          // 信息保存cookie
+          query.sf = 1;
+          //改变当前身份状态，存入cookie
+          setAuthInfo(query)
+
+          if (query.eid) {
+            // 跳转至正在申报列中的列表页面
+            let recordPath = config.declareEidRecordPath.replace(':id', '')
+            this.$router.push(recordPath + query.eid)
+          } else {
+            // 跳转申报记录页面
+            let recordPath = config.declareRecordPath.replace(':id', '')
+            this.$router.push(recordPath + query.xh)
+          }
+        } else {
+          auth()
+        }
+      },
       /**
        * 自动监控，每隔n秒刷新一次数据
        */
@@ -336,7 +369,11 @@
         line-height: 44px;
         color: rgba(74, 88, 96, 1);
       }
-
+      .btn-wysb{
+        position: absolute;
+        top: 36px;
+        right: 48px;
+      }
       .student-id {
         height: 36px;
         position: absolute;
