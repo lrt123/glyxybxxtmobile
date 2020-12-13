@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import App from './App'
+import Axios from "axios";
 import store from './store'
 import router from './router'
 import moment from 'moment'
@@ -24,6 +25,7 @@ import '@/ui/nutui'
 // import VConsole from 'vconsole' //import vconsole
 // let vConsole = new VConsole() // 初始化
 // console.log('VConsole is cool')
+
 
 Vue.config.productionTip = false
 Vue.prototype.$moment = moment

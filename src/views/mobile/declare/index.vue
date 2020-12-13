@@ -34,7 +34,8 @@
     <div class="main-content">
       <div class="title">请填写申报信息</div>
 
-      <el-form class="form" ref="ruleForm" :model="submitBxdParams" :rules="rules" label-width="80px" label-position="top"
+      <el-form class="form" ref="ruleForm" :model="submitBxdParams" :rules="rules" label-width="80px"
+               label-position="top"
                :show-message="true">
         <el-form-item label="报修类别" prop="bxlb">
           <el-input v-model="submitBxdParams.bxlb" readonly suffix-icon="el-icon-caret-bottom" placeholder="选择报修类别"
@@ -69,43 +70,37 @@
           <el-input v-model="submitBxdParams.sbrsj" type="tel" placeholder="填写本人手机号码"></el-input>
         </el-form-item>
         <el-form-item label="相关图片" prop="tp" class="tp-form-item">
-          <div class="label" slot="label">上传资料，请选择 
+          <div class="label" slot="label">上传资料，请选择
             <van-dropdown-menu>
               <van-dropdown-item v-model="submitType" @change="onSubmitTypeChange" :options="[
                 { text: '图片', value: 'img' },
-                { text: '视频', value: 'vedio' }
-              ]" />
-            </van-dropdown-menu></div>
+                { text: '视频', value: 'video' }
+              ]"/>
+            </van-dropdown-menu>
+          </div>
 
-          <template v-if="submitType === 'vedio'">
+          <template v-show="submitType === 'video'">
             <form
-              v-if="uploadend === false"
-              class="form_vedio van-uploader__upload"
-              id="form_vedio"
-              name="form_vedio"
-              :action="action_vedio"
+              v-show="uploadend === false && submitType === 'video'"
+              class="form_video van-uploader__upload"
+              id="form_video"
+              name="form_video"
+              :action="action_video"
               method="post"
               enctype="multipart/form-data"
             >
-              <van-icon class="van-uploader__upload-icon" name="photograph" />
+              <van-icon class="van-uploader__upload-icon" name="photograph"/>
               <span class="van-uploader__upload-text">上传视频</span>
-              <input class="file van-uploader__input" id="file" type="file" name="file" accept="video/*" @change="uploadFile" />
-              <input class="value" id="eid" type="input" name="eid" value="" />
-              <input class="value" id="sbr" type="input" name="sbr" value="" />
-              <input class="value" id="sbrsj" type="input" name="sbrsj" value="" />
-              <input class="value" id="sbrxh" type="input" name="sbrxh" value="" />
-              <input class="value" id="bxlb" type="input" name="bxlb" value="" />
-              <input class="value" id="bxnr" type="input" name="bxnr" value="" />
-              <input class="value" id="yysj" type="input" name="yysj" value="" />
-              <input class="value" id="xxdd" type="input" name="xxdd" value="" />
+              <input class="file van-uploader__input" id="file" type="file" name="file" accept="video/*"
+                     @change="uploadFile"/>
             </form>
-            <div v-else class="vedio-player" id="vedio-player">
-              <van-icon class="vedio-player__close" name="close" @click="uploadFileClear" />
+            <div v-show="uploadend === true" class="video-player" id="video-player">
+              <van-icon class="video-player__close" name="close" @click="uploadFileClear"/>
             </div>
           </template>
 
           <van-uploader
-            v-else-if="submitType === 'img'"
+            v-show="submitType === 'img'"
             v-model="uploadFiles"
             accept="image/*"
             :max-count="3"
@@ -175,6 +170,7 @@
 
 <script>
   import {BxdServlet} from '@/api/BxdServlet'
+  import {VideoUpload, DeleteVideo} from "../../../api/VideoUpload";
   import config from '@/config'
   import compress from '@/utils/image-compress'
   import {mapGetters} from 'vuex'
@@ -185,8 +181,8 @@
     name: 'Declare',
     data() {
       return {
-        submitType: 'img', // 上传类型，img或vedio
-        action_vedio: '', // 上传视频时action的地址
+        submitType: 'img', // 上传类型，img或video
+        action_video: '', // 上传视频时action的地址
         uploadend: false, // 上传视频状态
         // 报修单请求参数
         bxdParams: {
@@ -206,8 +202,11 @@
           yydesc: '', // 同上，日期 + 描述组合，提交时替换字段为yysj
           bxlb: '', // 报修类别，下拉框
           bxnr: '', // 具体哪里坏了
-          tp: [] // 图片，传递base64数据，以json格式返回
+          tp: [], // 图片，传递base64数据，以json格式返回
+          sp: '',//视频文件名
         },
+        tempVideo: '',//视频base64格式，临时存放
+        tempVideoFile: {},//视频文件
         current: 0, // 轮播图序列
         declarerInfo: {}, // 保存用户信息 { xm: "???", xh: "212016528", head: "http://img02.fs.yiban.cn/6615683/avatar/user/200" }
         recordPath: config.declareRecordPath,
@@ -254,7 +253,8 @@
         this.$router.push('/')
       }
 
-      this.action_vedio = this.config.api + '/Fileload'
+      //暂时用不到
+      this.action_video = this.config.api + '/Fileload'
 
       const {xm, xh, head} = authInfo
       this.declarerInfo = {
@@ -362,63 +362,58 @@
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            if (this.submitType === 'img') {
-              this.submitBxdParams.tp = JSON.stringify(this.submitBxdParams.tp)
-              delete this.submitBxdParams.yydesc
-              BxdServlet(this.submitBxdParams).then(() => {
-                this.$toast({
-                  message: '申报已提交',
-                  icon: this.icons + 'icon_suc@2x.png',
-                  duration: 1500,
-                  onClose: async () => {
-                    this.resetForm('ruleForm')
-                    await this.fetchData(this.submitBxdParams.sbrxh)
-                    this.$router.push(`${this.recordPath}${this.submitBxdParams.sbrxh}`)
-                  }
-                })
-              }).catch(() => {
-                this.loading = false
-                this.submitText = '重新提交'
-                this.$toast({
-                  message: '申报失败，请重试',
-                  icon: this.icons + 'tip_info@2x.png',
-                  duration: 1500
-                })
-              })
-            } else {
-              document.getElementById('eid').value = this.submitBxdParams.eid;
-              document.getElementById('sbr').value = this.submitBxdParams.sbr;
-              document.getElementById('sbrsj').value = this.submitBxdParams.sbrsj;
-              document.getElementById('sbrxh').value = this.submitBxdParams.sbrxh;
-              document.getElementById('bxlb').value = this.submitBxdParams.bxlb;
-              document.getElementById('bxnr').value = this.submitBxdParams.bxnr;
-              document.getElementById('yysj').value = this.submitBxdParams.yysj;
-              document.getElementById('xxdd').value = this.submitBxdParams.xxdd;
-              document.getElementById('form_vedio').submit()
-              return
-
-
-              // 1.创建一个FormData对象，直接把我们的表单传进去  
-              var formData = new FormData(document.forms.namedItem('form_vedio'))
-              // 2.创建一个http请求对象
-              var xhr = new XMLHttpRequest()
-              xhr.open('post', this.action_vedio)
-              xhr.send(formData)
-              xhr.onload = function(resp) {
-                if (xhr.status == 200) {
-                  alert('提交成功！');
-                } else {
-                  console.log('Error:' + xhr.status);
-                }
-              }
-              xmlHttpRequest.onerror = function(err) {
-                console.log(err);
-              }
+            this.loading = true
+            this.submitBxdParams.tp = JSON.stringify(this.submitBxdParams.tp)
+            delete this.submitBxdParams.yydesc
+            if (this.tempVideoFile !== ''){
+              this.UploadVideoToFur()
+            }else {
+              this.SubmitForm()
             }
+
           } else {
             this.showPopupTip('申报信息未填完哦~')
             return false
           }
+        })
+      },
+      //上传视频到服务器
+      UploadVideoToFur(){
+        VideoUpload(this.tempVideoFile).then((res) => {
+          this.submitBxdParams.sp = res.data.obj
+          this.SubmitForm()
+        }).catch(() => {
+          this.loading = false
+          this.submitText = '重新提交'
+          this.$toast({
+            message: '申报失败，请重试',
+            icon: this.icons + 'tip_info@2x.png',
+            duration: 1500
+          })
+        })
+      },
+      //提交表单，包含视频（文件名）、图片（base64）
+      SubmitForm(){
+        BxdServlet(this.submitBxdParams).then(() => {
+          this.loading = false
+          this.$toast({
+            message: '申报已提交',
+            icon: this.icons + 'icon_suc@2x.png',
+            duration: 1500,
+            onClose: async () => {
+              this.resetForm('ruleForm')
+              await this.fetchData(this.submitBxdParams.sbrxh)
+              this.$router.push(`${this.recordPath}${this.submitBxdParams.sbrxh}`)
+            }
+          })
+        }).catch(() => {
+          this.loading = false
+          this.submitText = '重新提交'
+          this.$toast({
+            message: '申报失败，请重试',
+            icon: this.icons + 'tip_info@2x.png',
+            duration: 1500
+          })
         })
       },
       /**
@@ -430,6 +425,9 @@
         this.$refs[formName].resetFields()
         this.clearyydateshow()
         this.deleteAllFiles()
+        if (this.SubmitForm.sp !== '' && this.SubmitForm.sp !== undefined){
+          DeleteVideo(this.submitForm.sp)
+        }
       },
       /**
        * 顶部提示，1.2s后自定隐藏
@@ -519,6 +517,9 @@
         this.uploadFiles = []
         this.uploadFilesCache = []
         this.submitBxdParams.tp = []
+        this.tempVideo = ''
+        this.tempVideoFile = ''
+
       },
       processFile(file, next) {
         compress(file, {
@@ -552,8 +553,20 @@
       onSubmitTypeChange(val) {
         if (val === 'img') {
           this.uploadend = false
-        } else if (val === 'vedio') {
-          this.deleteAllFiles()
+        } else if (val === 'video') {
+          if (this.tempVideo !== ""){
+            this.uploadend = true
+            if (document.getElementsByTagName("video") === null) {
+              var video = document.createElement("video");
+              video.controls = "controls";
+              video.src = this.tempVideo;
+              video.preload = 'auto'
+              video.width = 300;
+              video.height = 200;
+              document.getElementById("video-player").appendChild(video);
+            }
+
+          }
         }
       },
       /**
@@ -562,25 +575,37 @@
       uploadFile(e) {
         this.uploadend = true
         let file = e.target.files[0]
+        const suffix = /\.[^\.]+$/.exec(file.name)
+        var _that = this
+        this.tempVideoFile = file
         if (window.FileReader) {
           var fr = new FileReader();
           fr.onloadend = function (e) {
-              var video = document.createElement("video");
-              video.controls = "controls";
-              video.src = e.target.result;
-              video.preload = 'auto'
-              video.width = 300;
-              video.height = 200;
-              document.getElementById("vedio-player").appendChild(video);
+            var video = document.createElement("video");
+            video.controls = "controls";
+            video.src = e.target.result;
+            video.preload = 'auto'
+            video.width = 300;
+            video.height = 200;
+            document.getElementById("video-player").appendChild(video);
+            _that.setTemSp(e.target.result);
           };
           fr.readAsDataURL(file);
         }
+      },
+      setTemSp(base64){
+        this.tempVideo = base64;
       },
       /**
        * 清除视频
        */
       uploadFileClear() {
         this.uploadend = false
+        this.tempVideoFile = ''
+        this.tempVideo = ''
+        if (this.SubmitForm.sp !== ''){
+          DeleteVideo(this.submitForm.sp)
+        }
         this.$nextTick(() => {
           document.getElementById("file").value = "";
         })
@@ -671,38 +696,40 @@
     .tp-form-item {
       .label {
         margin-bottom: 15px;
+
         .van-dropdown-menu {
           display: inline-block;
+
           .van-dropdown-menu__bar {
             box-shadow: none;
           }
         }
-        
+
       }
 
       .tips {
-          font-size: 26px;
-          color: #b5b5b5;
-        }
+        font-size: 26px;
+        color: #b5b5b5;
+      }
 
-      .form_vedio {
+      .form_video {
 
         .van-uploader__upload-icon {
           color: #dcdee0;
           font-size: 48px;
         }
-        
+
         input.value {
           display: none;
         }
       }
 
-      .vedio-player {
+      .video-player {
         width: 100%;
         text-align: center;
         position: relative;
 
-        .vedio-player__close {
+        .video-player__close {
           position: absolute;
           top: -10px;
           right: -10px;
