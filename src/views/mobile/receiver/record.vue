@@ -7,7 +7,8 @@
       <div class="name">姓名：{{ authInfo.xm }}</div>
       <div class="student-id">工号：{{ authInfo.xh }}</div>
       <div class="gs">
-        <el-progress v-if="gs || gs == 0" :text-inside="false" :stroke-width="12" :percentage="((2 - gs) / 2) * 100" :color="customColors" :format="formatGs"></el-progress>
+        剩余工时：
+        <el-progress v-if="gs|| gs == 0" :text-inside="false" :stroke-width="12" :percentage="((2 - gs) / 2) * 100" :color="customColors" :format="formatGs"></el-progress>
       </div>
     </div>
     <div class="main-header">
@@ -201,7 +202,7 @@
           op: 'selgs',
           ybid: this.authInfo.ybid
         }).then(res => {
-          this.gs = res && res.gs
+          this.gs = res.obj && res.obj.gs
         })
       },
       formatGs(percentage) {
