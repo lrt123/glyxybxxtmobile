@@ -80,5 +80,5 @@ export function responseErrorNotify(info) {
  * obj.sbsj.time
  */
 export function sortBxd(a, b) {
-  return b.sbsj.time - a.sbsj.time
+  return b.sbsj - a.sbsj
 }

@@ -7,8 +7,8 @@
       <div class="name">姓名：{{ authInfo.xm }}</div>
       <div class="student-id">工号：{{ authInfo.xh }}</div>
       <div class="gs">
-        剩余工时：
-        <el-progress v-if="gs|| gs == 0" :text-inside="false" :stroke-width="12" :percentage="((2 - gs) / 2) * 100" :color="customColors" :format="formatGs"></el-progress>
+        <div class="gs-text">剩余工时：</div>
+        <el-progress v-if="gs || gs == 0" :text-inside="false" :stroke-width="12" :percentage="((2 - gs) / 2) * 100" :color="customColors" :format="formatGs"></el-progress>
       </div>
     </div>
     <div class="main-header">
@@ -58,7 +58,7 @@
                   <span class="custom-title">{{item.xq}}</span>
                 </template>
                 <template #extra>
-                  {{$moment(item.qdsj.time).format('YYYY-MM-DD HH:mm')}}
+                  {{$moment(item.qdsj).format('YYYY-MM-DD HH:mm')}}
                 </template>
               </van-cell>
             </van-dropdown-item>
@@ -77,7 +77,7 @@
           <div class="bid">编号：{{ item.id }}</div>
           <div class="date">
             <i class="el-icon-time"></i>
-            <span>{{ $moment(item.sbsj.time).format(format) }}</span>
+            <span>{{ $moment(item.sbsj).format(format) }}</span>
           </div>
           <div class="category">
             报修类别：{{ item.bxlb }}
@@ -208,7 +208,7 @@
       formatGs(percentage) {
         let multiplier = 100
         let gs = (2 * multiplier - this.gs * multiplier) / 100 // ×100 防止精度丢失
-        return `${gs}h`;
+        return `${gs}`;
       },
       /**
        * 自动监控，每隔n秒刷新一次数据
@@ -389,6 +389,10 @@
         right: 10px;
         width: 160px;
 
+        .gs-text{
+          font-size: 20px;
+          margin: 8px 0;
+        }
         .el-progress__text {
           font-size: 22px !important;
         }
