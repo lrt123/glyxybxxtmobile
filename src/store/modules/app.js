@@ -7,7 +7,10 @@ const state = {
   },
   device: 'desktop',
   size: Cookies.get('size') || 'medium',
-  config: {}
+  config: {
+    //上线修改，考虑初次访问时设置
+    bxdimg: "http://localhost:8089/bxdimg"
+  }
 }
 
 const mutations = {

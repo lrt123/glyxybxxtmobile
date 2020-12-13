@@ -314,7 +314,7 @@
           page: 1, // 第几页
           num: 30 // 多少条
         }).then(res => {
-          if (res && res.obj.qlist) {
+          if (res.obj && res.obj.qlist) {
             this.qdlist = res.obj.qlist
           } else {
             this.$notify({ type: 'error', message: '数据异常', duration: 1000 })

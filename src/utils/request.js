@@ -9,7 +9,7 @@ const service = axios.create({
   transformRequest: [function(data) {
     return qs.stringify(data)
   }],
-  timeout: 30* 1000 // request timeout
+  timeout: 300 * 1000 // request timeout
 })
 
 service.interceptors.request.use(
