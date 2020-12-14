@@ -105,7 +105,7 @@
           </div>
           <div class="container-item">
             <div class="container-item-left">申报时间：</div>
-            <div class="container-item-right">{{ bxdInfo.sbsj && $moment(bxdInfo.sbsj.time).format(format) }}</div>
+            <div class="container-item-right">{{ bxdInfo.sbsj && $moment(bxdInfo.sbsj).format(format) }}</div>
           </div>
           <div class="container-item">
             <div class="container-item-left">预约时间：</div>
@@ -167,7 +167,7 @@
             <div class="container-item">
               <div class="container-item-left">工时：</div>
               <div class="container-item-right orange-txt">
-                <span v-if="hc">{{gs}} <span class="unit">小时</span></span>
+                <span v-if="hc">{{gs}} </span>
                 <span v-else>--</span>
               </div>
             </div>
@@ -287,7 +287,7 @@
             </van-button>
           </div>
         </div>
-        <div class="title">工时（小时）：</div>
+        <div class="title">工时：</div>
         <div class="desc" style="text-align: center;">
           <van-stepper v-model="gs" :min="0" step="0.1" input-width="150px" button-size="38px"/>
         </div>
@@ -331,10 +331,6 @@
     components: {noDataShow},
     data() {
       return {
-        img: false,
-        video: false,
-        videoUrl: '',
-        ysr: false,//判断是不是验收人
         showType: 'img', // img或vedio申报人上传的是图片还是视频
         popupShow: false, // 顶部弹出popup
         popupText: '',
@@ -446,7 +442,6 @@
         }).then(response => {
           this.toast.clear()
           if (response.obj.blist && response.obj.blist.length > 0) {
-            this.bxdInfo = {}
             this.bxdInfo = response.obj.blist[0]
             this.resetBxdInfo()
           } else {
@@ -555,7 +550,7 @@
         })
 
         function step1() {
-          const sbsj = me.$moment(me.bxdInfo.sbsj.time).format(me.format)
+          const sbsj = me.$moment(me.bxdInfo.sbsj).format(me.format)
           let desc = `<span class="name">${me.bxdInfo.sbr}</span>于${sbsj}提交了维修申报.`
           step.steps.push({
             title: '申报中',
@@ -576,7 +571,7 @@
           }
           step.steps.push({
             title: '维修中',
-            time: me.$moment(me.bxdInfo.sbsj.time).format(me.format),
+            time: me.$moment(me.bxdInfo.sbsj).format(me.format),
             desc: desc
           })
         }
@@ -584,7 +579,7 @@
         function step3() {
           step.steps.push({
             title: '已完成',
-            time: me.bxdInfo.wxsj ? me.$moment(me.bxdInfo.wxsj.time).format(me.format) : '--',
+            time: me.bxdInfo.wxsj ? me.$moment(me.bxdInfo.wxsj).format(me.format) : '--',
             desc: '维修工作已完成.'
           })
         }
@@ -592,7 +587,7 @@
         function step4() {
           step.steps.push({
             title: '已撤回',
-            time: me.bxdInfo.wxsj ? me.$moment(me.bxdInfo.wxsj.time).format(me.format) : '--',
+            time: me.bxdInfo.wxsj ? me.$moment(me.bxdInfo.wxsj).format(me.format) : '--',
             desc: '申报已撤回，原因：' + me.bxdInfo.cxsy + '.'
           })
         }
@@ -665,8 +660,7 @@
               duration: 1500
             })
           })
-        }).catch(() => {
-        })
+        }).catch(() => {})
       },
 
       /**
@@ -1007,7 +1001,6 @@
           text-align: center;
           margin: 5px 0;
         }
-
         .evaluate-add {
           color: #ececec;
         }
@@ -1149,7 +1142,7 @@
             text-align: left;
           }
 
-          &-right {
+           &-right {
             flex: 1;
             margin-left: 30px;
             font-size: 32px;
@@ -1174,9 +1167,9 @@
             }
 
             .unit {
-              font-size: 28px;
-              margin-left: 5px;
-            }
+                font-size: 28px;
+                margin-left: 5px;
+              }
 
             .tel {
               position: absolute;
@@ -1255,7 +1248,6 @@
         .select-hc {
           max-height: 36vh;
           overflow: auto;
-
           .hc {
             height: 52px;
             display: flex;
@@ -1263,7 +1255,6 @@
             padding: 0 5px;
             position: relative;
             margin-bottom: 12px;
-
             .hc-name {
               width: 280px;
               font-size: 26px;
@@ -1273,34 +1264,28 @@
               border-radius: 10px;
               background: #fff;
             }
-
-            /deep/ .hc-sl {
+            /deep/.hc-sl {
               display: inline-block;
               margin-left: 20px;
-
               .van-stepper__minus,
               .van-stepper__plus {
                 background: transparent;
               }
             }
-
             .hc-dw {
               font-size: 28px;
               display: inline-block;
               margin-left: 10px;
             }
-
             .hc-del {
               font-size: 32px;
               position: absolute;
               right: 20px;
             }
           }
-
           .button-add {
             margin-top: 5px;
           }
-
           .button-submit {
             margin-top: 20px !important;
             box-shadow: 0px 20px 40px rgba(16, 175, 90, 0.3);

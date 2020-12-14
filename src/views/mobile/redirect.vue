@@ -32,9 +32,9 @@
           case 2:
             query = {
               xm: '接单人',
-              xh: '1',
+              xh: '11',
               sf: 2,
-              ybid: 1,
+              ybid: 11,
               eid: 1
             }
             break

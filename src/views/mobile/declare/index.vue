@@ -23,7 +23,7 @@
         >
           <!--<router-link :to="`${detailPath}${item.id}`">-->
           <div class="bid">编号：{{ item.id }}</div>
-          <div class="date"><i class="el-icon-time"></i> <span>{{ $moment(item.sbsj.time).format(format) }}</span></div>
+          <div class="date"><i class="el-icon-time"></i> <span>{{ $moment(item.sbsj).format(format) }}</span></div>
           <div class="category">申报类别：{{ item.bxlb }}</div>
           <div class="state">{{ getState(item.state).text }}</div>
           <div class="indicator">{{ index + 1 }}/{{ swipeBlistLength }}</div>
@@ -98,6 +98,7 @@
               <van-icon class="video-player__close" name="close" @click="uploadFileClear"/>
             </div>
           </template>
+
 
           <van-uploader
             v-show="submitType === 'img'"
@@ -345,6 +346,15 @@
             break
           case 'bxlb':
             this.actions = config.repairCategory.map(item => {
+              switch (item) {
+                case 'wywx': item = '物业维修'; break;
+                case 'sdwx': item = '水电维修'; break;
+                case 'rswx': item = '热水维修'; break;
+                case 'jdwx': item = '家电维修'; break;
+                case 'ktwx': item = '空调维修'; break;
+                case 'qt': item = '其他'; break;
+              }
+              //然后根据这个item，请求后台字典，选择对应的具体维修地点
               return {name: item}
             })
             break
@@ -416,6 +426,7 @@
         this.$refs[formName].resetFields()
         this.clearyydateshow()
         this.deleteAllFiles()
+        this.uploadend = false
         if (this.SubmitForm.sp !== '' && this.SubmitForm.sp !== undefined){
           DeleteVideo(this.submitForm.sp)
         }
@@ -441,23 +452,15 @@
         const day = this.$moment(this.yydate, 'YYYY-MM-DD').day() // Number
         this.yyday = this.weeks[day]
       },
-      beforeRead(file) {
-        if (file.type.indexOf('image/') !== -1) {
-          this.toast = this.$toast({
-            type: 'loading',
-            message: '请稍后',
-            duration: 0
-          })
-          return true
-        } else {
-          this.$notify({
-            message: '仅限上传图片',
-            className: 'my-notify error'
-          })
-          return false
-        }
+      beforeRead() {
+        this.toast = this.$toast({
+          type: 'loading',
+          message: '请稍后',
+          duration: 2000
+        })
+        return true
       },
-      afterRead(file) {
+      upLoadFile(file) {
         compress(file.file, {
           type: 'file',
           compress: {
@@ -482,6 +485,15 @@
             this.submitBxdParams.tp = this.setParamsTp()
           }
         })
+      },
+      afterRead(file) {
+        if (file instanceof Array) {
+          file.forEach((item) => {
+            this.upLoadFile(item)
+          })
+        } else {
+          this.upLoadFile(file)
+        }
       },
       setParamsTp() {
         return this.uploadFilesCache.map(item => {
