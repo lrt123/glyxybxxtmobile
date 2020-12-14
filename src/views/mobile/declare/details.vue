@@ -478,8 +478,8 @@
         const bxdInfo = this.bxdInfo
         // 提取报修图片
         let bxdimg = this.$store.getters.config.bxdimg
-        let tp = bxdInfo.tp
-        let sp = bxdInfo.sp
+        let tp = bxdInfo.tp?bxdInfo.tp : ''
+        let sp = bxdInfo.sp?bxdInfo.sp : ''
         if (tp.trim() !== ''){
           this.img = true
           this.images = []
@@ -495,7 +495,9 @@
         }
 
         // 提取报修耗材
-        this.formatHc(this.bxdInfo.hc)
+        if (this.bxdInfo.hc !== null){
+          this.formatHc(copyObj(this.bxdInfo.hc))
+        }
         // 提取工时
         this.gs = this.bxdInfo.gs
 
