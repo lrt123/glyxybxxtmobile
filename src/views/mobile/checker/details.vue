@@ -64,7 +64,7 @@
         <div class="category">报修类别：{{ bxdInfo.bxlb }}</div>
         <div class="desc">内容：{{ bxdInfo.bxnr }}</div>
         <div class="img-grid">
-          <van-grid v-if="showType === 'img'" :column-num="3">
+          <van-grid v-show="img" :column-num="3">
             <van-grid-item
               class="img-grid-item"
               v-for="(src, index) in images"
@@ -74,9 +74,8 @@
               <van-image class="image" :src="src" fit="cover"/>
             </van-grid-item>
           </van-grid>
-          <div v-else-if="showType === 'vedio'" class="vedioBox">
-            <video width="320" height="200" controls>
-              <source :src="images" type="video/*">
+          <div v-if="video" class="videoBox">
+            <video width="320" height="200" controls :src="videoUrl" preload="auto">
               您的浏览器不支持Video标签。
             </video>
           </div>
@@ -212,14 +211,26 @@
             </div>
           </template>
 
+
         </div>
         <div class="button">
           <template v-if="eid">
-<!--            <van-button class="button-item select" type="info" size="normal" round @click.prevent="hcDialog = true">-->
-<!--              {{ bxdInfo.hc ? '修改耗材和工时' : '填写耗材和工时' }}-->
-<!--            </van-button>-->
-            <van-button class="button-item select" type="primary" size="normal" round @click.prevent="shyPass('确定通过', 1)">通过审核</van-button>
-            <van-button class="button-item complete" type="danger" size="normal" round @click.prevent="shyPass('确定不通过', 2)">不通过审核</van-button>
+            <van-button class="button-item select" type="primary" size="normal" round
+                        @click.prevent="shyPass('确定通过', 1)">通过审核
+            </van-button>
+            <van-button class="button-item complete" type="danger" size="normal" round
+                        @click.prevent="shyPass('确定不通过', 2)">不通过审核
+            </van-button>
+          </template>
+        </div>
+        <div class="button">
+          <template v-if="ysr">
+            <van-button class="button-item select" type="primary" size="normal" round
+                        @click.prevent="ysrPass('确定通过', 4)">通过验收
+            </van-button>
+            <van-button class="button-item complete" type="danger" size="normal" round
+                        @click.prevent="ysrPass('确定不通过', 5)">不通过验收
+            </van-button>
           </template>
         </div>
       </div>
@@ -247,8 +258,9 @@
 
 
     <!-- add 20200901 -->
-     <!--填写耗材和工时-->
-    <van-dialog v-model="hcDialog" :show-confirm-button="false" :showCancelButton="hc.length === 0" width="94%" @cancel="cancleHc">
+    <!--填写耗材和工时-->
+    <van-dialog v-model="hcDialog" :show-confirm-button="false" :showCancelButton="hc.length === 0" width="94%"
+                @cancel="cancleHc">
       <div class="hc-dialog" slot="default">
         <div class="title">耗材：</div>
         <div class="desc">
@@ -267,11 +279,12 @@
               class="hc"
             >
               <div class="hc-name">{{item.mc}}</div>
-              <van-stepper class="hc-sl" v-model="item.sl" :min="0" input-width="50px" button-size="26px" />
+              <van-stepper class="hc-sl" v-model="item.sl" :min="0" input-width="50px" button-size="26px"/>
               <div class="hc-dw">{{item.dw}}</div>
-              <van-icon class="hc-del" :name="icons + 'icon_delete_s@2x.png'" @click="removeHc(item.id)" />
+              <van-icon class="hc-del" :name="icons + 'icon_delete_s@2x.png'" @click="removeHc(item.id)"/>
             </div>
-            <van-button class="button-add" type="primary" size="large" plain round @click.prevent="showHcList">点击添加耗材</van-button>
+            <van-button class="button-add" type="primary" size="large" plain round @click.prevent="showHcList">点击添加耗材
+            </van-button>
           </div>
         </div>
         <div class="title">工时：</div>
@@ -376,7 +389,7 @@
     async created() {
       this.isQrcode = this.$route.query.hasOwnProperty('qrcode')
       this.authInfo = getAuthInfo()
-       if (this.authInfo.sf != 3 ) { // 审核员sf=3
+      if (this.authInfo.sf != 3) { // 审核员sf=3
         this.$router.push('/no-permission')
         return
       }
@@ -389,22 +402,22 @@
        */
       async getHc() {
         await HcServlet({
-            op: 'selhc'
-          }).then(res => {
-            if (res && res.obj.hlist) {
-              this.hclist = res.obj.hlist.map(item => {
-                return {
-                  id: item.id,
-                  mc: item.mc,
-                  name: item.mc + '(' + item.dw +')',
-                  dw: item.dw,
-                }
-              })
-            } else {
-              this.$notify({ type: 'warning', message: '数据异常', duration: 1000 })
-            }          
-          }).catch(err => {
-          this.$notify({ type: 'error', message: '接口异常或网络中断', duration: 1000 })
+          op: 'selhc'
+        }).then(res => {
+          if (res && res.obj.hlist) {
+            this.hclist = res.obj.hlist.map(item => {
+              return {
+                id: item.id,
+                mc: item.mc,
+                name: item.mc + '(' + item.dw + ')',
+                dw: item.dw,
+              }
+            })
+          } else {
+            this.$notify({type: 'warning', message: '数据异常', duration: 1000})
+          }
+        }).catch(err => {
+          this.$notify({type: 'error', message: '接口异常或网络中断', duration: 1000})
         })
       },
       /**
@@ -430,7 +443,6 @@
           this.toast.clear()
           if (response.obj.blist && response.obj.blist.length > 0) {
             this.bxdInfo = response.obj.blist[0]
-            console.log(this.bxdInfo.sbsj)
             this.resetBxdInfo()
           } else {
             this.toast.clear()
@@ -452,31 +464,36 @@
         const me = this
         const bxdInfo = this.bxdInfo
         // 提取报修图片
-        if (bxdInfo.tp.length > 0) {
-          let bxdimg = this.$store.getters.config.bxdimg
-          let tp = bxdInfo.tp
-          let firstCode = tp.charAt(0) // 读取第一个字符，是@代表申报人上传的是视频
-          if (firstCode === '@') { // 代表视频
-            this.showType = 'vedio'
-            this.images = `${bxdimg}/${tp}`
-          } else { // 代表图片
-            this.showType = 'img'
-            this.images = []
-            const arr = tp.split('|')
-            arr.shift()
-            this.images = arr.map(item => {
-              return `${bxdimg}/${item}`
-            })
-          }
+        let bxdimg = this.$store.getters.config.bxdimg
+        let tp = bxdInfo.tp?bxdInfo.tp : ''
+        let sp = bxdInfo.sp?bxdInfo.sp : ''
+        if (tp.trim() !== '') {
+          this.img = true
+          this.images = []
+          const arr = tp.split('|')
+          arr.shift()
+          this.images = arr.map(item => {
+            return `${bxdimg}/${item}`
+          })
+        }
+        if (sp.trim() !== '') {
+          this.video = true
+          this.videoUrl = `${bxdimg}/${sp}`
         }
 
         // 提取报修耗材
-        this.formatHc(copyObj(this.bxdInfo.hc))
+        if (this.bxdInfo.hc !== null){
+          this.formatHc(copyObj(this.bxdInfo.hc))
+        }
         // 提取工时
         this.gs = this.bxdInfo.gs
-
         // 评价
         bxdInfo.pj = Number(bxdInfo.pj)
+        if (bxdInfo.shy1 === this.authInfo.ybid && bxdInfo.shy1state === 1){
+          this.authInfo.eid = false
+        }else if (bxdInfo.shy2 === this.authInfo.ybid && bxdInfo.shy2state === 1){
+          this.authInfo.eid = false
+        }
 
         // 审核员审核状态
         if (bxdInfo.s1) {
@@ -490,7 +507,7 @@
           bxdInfo.s2.tag = s2.tag
         }
 
-        // 报修单状态，0未派单，1已派单，2已维修，3撤销单
+        // 报修单状态，0未派单，1已派单，2已维修，3撤销单，4已验收，5验收不通过
         bxdInfo.state = Number(bxdInfo.state)
 
         // 添加进度步骤
@@ -508,6 +525,10 @@
           step1()
           step2()
         } else if (state === 2) { // 已维修
+          //默认验收员为审核员1
+          if (this.bxdInfo.shy2state === 1 && this.authInfo.ybid === this.bxdInfo.shy1){
+            this.ysr = true
+          }
           step.active = 2
           step1()
           step2()
@@ -642,9 +663,50 @@
         }).catch(() => {})
       },
 
-      
-       // add 20200901
-       /**
+      /**
+       * 审核通过
+       * @param text
+       * @param state 1通过 2不通过
+       */
+      ysrPass(text, state) {
+        this.$dialog.alert({
+          message: text,
+          showCancelButton: true
+        }).then(() => {
+          ShyServlet({
+            op: 'upbxdbyysr', // 调用方法，固定值*
+            shyid: this.authInfo.ybid, // 易班id*
+            bid: this.bxdInfo.id, // 报修单id*
+            state: state // 审核情况*，4通过，5不通过
+          }).then(res => {
+            if (res.status === 'success') {
+              this.$toast({
+                message: '提交成功',
+                icon: this.icons + 'icon_suc@2x.png',
+                duration: 1500,
+                onClose: () => {
+                  this.getBxdDetails()
+                }
+              })
+            } else {
+              this.$toast({
+                message: '提交失败',
+                icon: this.icons + 'tip_info@2x.png',
+                duration: 1500
+              })
+            }
+          }).catch(() => {
+            this.$toast({
+              message: '提交失败',
+              icon: this.icons + 'tip_info@2x.png',
+              duration: 1500
+            })
+          })
+        }).catch(() => {
+        })
+      },
+      // add 20200901
+      /**
        * 根据接口返回格式组装数据
        */
       formatHc(hc) {
@@ -1182,7 +1244,7 @@
           background: rgba(244, 246, 248, 1);
           border-radius: 32px;
         }
-        
+
         .select-hc {
           max-height: 36vh;
           overflow: auto;
