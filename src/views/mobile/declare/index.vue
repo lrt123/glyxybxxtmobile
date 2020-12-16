@@ -38,8 +38,18 @@
                label-position="top"
                :show-message="true">
         <el-form-item label="报修类别" prop="bxlb">
-          <el-input v-model="submitBxdParams.bxlb" readonly suffix-icon="el-icon-caret-bottom" placeholder="选择报修类别"
-                    @focus="handleInputFocus('bxlb')"></el-input>
+<!--          <el-input v-model="submitBxdParams.bxlb" readonly suffix-icon="el-icon-caret-bottom" placeholder="选择报修类别"-->
+<!--                    @focus="handleInputFocus('bxlb')">-->
+<!--          </el-input>-->
+<!--           v-model="submitBxdParams.bxlb"-->
+          <el-cascader
+            class="cascader-bxlb"
+            placeholder="选择报修类别"
+            @change="bxlbChange"
+            :options="options"
+            filterable
+            clearable
+          ></el-cascader>
         </el-form-item>
         <el-form-item label="报修内容" prop="bxnr">
           <el-input v-model="submitBxdParams.bxnr" type="textarea" :rows="3" placeholder="填写报修详细内容"></el-input>
@@ -170,7 +180,7 @@
 </template>
 
 <script>
-  import {BxdServlet} from '@/api/BxdServlet'
+  import {BxdServlet,BxlbServlet} from '@/api/BxdServlet'
   import {VideoUpload, DeleteVideo} from "../../../api/VideoUpload";
   import config from '@/config'
   import compress from '@/utils/image-compress'
@@ -182,6 +192,46 @@
     name: 'Declare',
     data() {
       return {
+        options: [{
+          value: '1',
+          label: '物业维修',
+          children: [{
+            value: '1',
+            label: '家具',
+          }, {
+            value: '2',
+            label: '腻子',
+          }]
+        }, {
+          value: '2',
+          label: '水电维修',
+          children: [{
+            value: '1',
+            label: '水龙头',
+          }, {
+            value: '2',
+            label: '阀门',
+          }, {
+            value: '3',
+            label: '冲水阀',
+          }, {
+            value: '4',
+            label: '管道',
+          }]
+        }, {
+          value: '3',
+          label: '热水维修',
+          children: [{
+            value: '1',
+            label: '无热水'
+          }, {
+            value: '2',
+            label: '热水水流小'
+          }, {
+            value: '3',
+            label: '热水温度低'
+          }]
+        }],
         submitType: 'img', // 上传类型，img或video
         action_video: '', // 上传视频时action的地址
         uploadend: false, // 上传视频状态
@@ -337,6 +387,17 @@
         this.actionSheetShow = false
         this.submitBxdParams[this.type] = item.name
       },
+      bxlbChange(currentVal){
+        if (currentVal.length == 0) {
+          this.submitBxdParams.bxlb = '';
+        } else {
+          this.submitBxdParams.bxlb = currentVal[0]+'-'+currentVal[1];
+          console.log(currentVal);
+          console.log(typeof currentVal);
+          console.log(this.submitBxdParams.bxlb);
+
+        }
+      },
       getActions(type) {
         switch (type) {
           case 'xq':
@@ -344,20 +405,20 @@
               return {name: item.text}
             })
             break
-          case 'bxlb':
-            this.actions = config.repairCategory.map(item => {
-              switch (item) {
-                case 'wywx': item = '物业维修'; break;
-                case 'sdwx': item = '水电维修'; break;
-                case 'rswx': item = '热水维修'; break;
-                case 'jdwx': item = '家电维修'; break;
-                case 'ktwx': item = '空调维修'; break;
-                case 'qt': item = '其他'; break;
-              }
-              //然后根据这个item，请求后台字典，选择对应的具体维修地点
-              return {name: item}
-            })
-            break
+          // case 'bxlb':
+          //   this.actions = config.repairCategory.map(item => {
+          //     switch (item) {
+          //       case 'wywx': item = '物业维修'; break;
+          //       case 'sdwx': item = '水电维修'; break;
+          //       case 'rswx': item = '热水维修'; break;
+          //       case 'jdwx': item = '家电维修'; break;
+          //       case 'ktwx': item = '空调维修'; break;
+          //       case 'qt': item = '其他'; break;
+          //     }
+          //     //然后根据这个item，请求后台字典，选择对应的具体维修地点
+          //     return {name: item}
+          //   })
+          //   break
         }
       },
       submitForm(formName) {
@@ -628,6 +689,9 @@
       }
 
       .el-form-item__content {
+        .cascader-bxlb{
+          width: 100%;
+        }
         .el-input__inner {
           background: rgba(244, 246, 248, 1);
           border-color: transparent;

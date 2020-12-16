@@ -12,3 +12,12 @@ export function BxdServlet(data) {
     data
   })
 }
+
+//BxlbServlet 报修类别
+export function BxlbServlet(data) {
+  return request({
+    url: '/BxlbdServlet',
+    method: 'post',
+    data
+  })
+}
