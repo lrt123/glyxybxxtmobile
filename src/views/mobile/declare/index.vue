@@ -221,7 +221,7 @@
           bid: ''//报修单id
         },
         tempVideo: '',//视频base64格式，临时存放
-        tempVideoFile: {},//视频文件
+        tempVideoFile: '',//视频文件
         current: 0, // 轮播图序列
         declarerInfo: {}, // 保存用户信息 { xm: "???", xh: "212016528", head: "http://img02.fs.yiban.cn/6615683/avatar/user/200" }
         recordPath: config.declareRecordPath,
@@ -431,9 +431,14 @@
       SubmitForm(){
         // 取值时：把获取到的Json字符串转换回对象
         var param = sessionStorage.getItem('param');
-        param = JSON.parse(param);
-        this.submitBxdParams.jid = param.jid
-        this.submitBxdParams.bid = param.bid
+        if (param != null){
+          param = JSON.parse(param);
+          this.submitBxdParams.jid = param.jid
+          this.submitBxdParams.bid = param.bid
+        }else {
+          this.submitBxdParams.jid = ''
+          this.submitBxdParams.bid = ''
+        }
         if (this.submitBxdParams.jid !== '' && this.submitBxdParams.bid !== '') {
           BxdServlet(this.submitBxdParams).then(() => {
             this.loading = false
