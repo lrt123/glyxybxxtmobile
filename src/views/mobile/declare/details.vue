@@ -469,10 +469,12 @@
             this.resetBxdInfo()
           }
         }).catch(() => {
-          this.toast.clear()
-          this.$elnotify.error({
-            message: '该工单不存在或接口异常~'
-          })
+          if(!this.$route.params.id == undefined){
+            this.toast.clear()
+            this.$elnotify.error({
+              message: '该工单不存在或接口异常~'
+            })
+          }
         })
       },
       /**
