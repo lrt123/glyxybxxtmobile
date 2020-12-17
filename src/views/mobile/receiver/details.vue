@@ -216,8 +216,9 @@
         </div>
         <div class="button">
           <template v-if="showCompleteButton">
-            <van-button class="button-item select" type="info" size="large" round @click.prevent="hcDialog = true">
-              {{ bxdInfo.hc ? '修改耗材和工时' : '填写耗材和工时' }}
+            <van-button v-if="disupdate" class="button-item select" type="info" size="large" round @click.prevent="hcDialog = true">
+<!--              {{ bxdInfo.hc ? '修改耗材和工时' : '填写耗材和工时' }}-->
+              填写耗材和工时
             </van-button>
             <van-button class="button-item complete" type="primary" size="large" round @click.prevent="submitHc">完成工单
             </van-button>
@@ -270,7 +271,7 @@
               <div class="hc-dw">{{item.dw}}</div>
               <van-icon class="hc-del" :name="icons + 'icon_delete_s@2x.png'" @click="removeHc(item.id)" />
             </div>
-            <van-button class="button-add" type="primary" size="large" plain round @click.prevent="showHcList">点击添加耗材</van-button>
+              <van-button  class="button-add" type="primary" size="large" plain round @click.prevent="showHcList">点击添加耗材</van-button>
           </div>
         </div>
         <div class="title">工时：</div>
@@ -319,6 +320,7 @@
     components: {noDataShow},
     data() {
       return {
+        disupdate:true,//设置修改耗材按钮
         showType: 'img', // img或vedio申报人上传的是图片还是视频
         popupShow: false, // 顶部弹出popup
         popupText: '',
@@ -434,6 +436,12 @@
           this.toast.clear()
           if (response.obj.blist && response.obj.blist.length > 0) {
             this.bxdInfo = response.obj.blist[0]
+            if(this.bxdInfo.hc && this.bxdInfo.shy1state != '2'&& this.bxdInfo.shy2state != '2'){
+              this.disupdate = false;
+            }
+            if (this.bxdInfo.shy1state == '2' || this.bxdInfo.shy2state == '2'){
+              this.disupdate = true;
+            }
             this.resetBxdInfo()
           }
         }).catch(err => {
@@ -810,6 +818,7 @@
           gs: this.gs // 所需工时
         }).then(res => {
           this.hcDialog = false // 隐藏弹框
+          this.disupdate = false;
           if (res.status === 'success') {
             this.$toast({
               message: '提交成功',
