@@ -180,7 +180,8 @@
 </template>
 
 <script>
-  import {BxdServlet,BxlbServlet} from '@/api/BxdServlet'
+  import {BxdServlet} from '@/api/BxdServlet'
+  import {DictListServlet} from '@/api/Dict'
   import {VideoUpload, DeleteVideo} from "../../../api/VideoUpload";
   import config from '@/config'
   import compress from '@/utils/image-compress'
@@ -192,46 +193,7 @@
     name: 'Declare',
     data() {
       return {
-        options: [{
-          value: '1',
-          label: '物业维修',
-          children: [{
-            value: '1',
-            label: '家具',
-          }, {
-            value: '2',
-            label: '腻子',
-          }]
-        }, {
-          value: '2',
-          label: '水电维修',
-          children: [{
-            value: '1',
-            label: '水龙头',
-          }, {
-            value: '2',
-            label: '阀门',
-          }, {
-            value: '3',
-            label: '冲水阀',
-          }, {
-            value: '4',
-            label: '管道',
-          }]
-        }, {
-          value: '3',
-          label: '热水维修',
-          children: [{
-            value: '1',
-            label: '无热水'
-          }, {
-            value: '2',
-            label: '热水水流小'
-          }, {
-            value: '3',
-            label: '热水温度低'
-          }]
-        }],
+        options:[],
         submitType: 'img', // 上传类型，img或video
         action_video: '', // 上传视频时action的地址
         uploadend: false, // 上传视频状态
@@ -255,6 +217,8 @@
           bxnr: '', // 具体哪里坏了
           tp: [], // 图片，传递base64数据，以json格式返回
           sp: '',//视频文件名
+          jid: '',//接单人id
+          bid: ''//报修单id
         },
         tempVideo: '',//视频base64格式，临时存放
         tempVideoFile: {},//视频文件
@@ -324,6 +288,7 @@
       this.recordPath = this.recordPath.replace(':id', '')
       this.detailPath = this.detailPath.replace(':id', '')
       this.inityydate()
+      this.initDict()
     },
     computed: {
       ...mapGetters(['blist', 'config']),
@@ -354,6 +319,14 @@
       }
     },
     methods: {
+      //初始化报修类别
+      initDict(){
+        DictListServlet().then(response => {
+          this.options = response.obj;
+        }).catch(() => {
+          this.$message.error('查询报修类别出错')
+        })
+      },
       /**
        * 根据学号获取报修单
        * @param info
@@ -456,27 +429,56 @@
       },
       //提交表单，包含视频（文件名）、图片（base64）
       SubmitForm(){
-        BxdServlet(this.submitBxdParams).then(() => {
-          this.loading = false
-          this.$toast({
-            message: '申报已提交',
-            icon: this.icons + 'icon_suc@2x.png',
-            duration: 1500,
-            onClose: async () => {
-              this.resetForm('ruleForm')
-              await this.fetchData(this.submitBxdParams.sbrxh)
-              this.$router.push(`${this.recordPath}${this.submitBxdParams.sbrxh}`)
-            }
-          })
-        }).catch(() => {
-          this.loading = false
-          this.submitText = '重新提交'
-          this.$toast({
-            message: '申报失败，请重试',
-            icon: this.icons + 'tip_info@2x.png',
-            duration: 1500
-          })
-        })
+        // 取值时：把获取到的Json字符串转换回对象
+        var param = sessionStorage.getItem('param');
+        param = JSON.parse(param);
+        this.submitBxdParams.jid = param.jid
+        this.submitBxdParams.bid = param.bid
+        if (this.submitBxdParams.jid !== '' && this.submitBxdParams.bid !== '') {
+          BxdServlet(this.submitBxdParams).then(() => {
+            this.loading = false
+            this.$toast({
+              message: '申请返工已提交',
+              icon: this.icons + 'icon_suc@2x.png',
+              duration: 1500,
+              onClose: async () => {
+                this.resetForm('ruleForm')
+                await this.fetchData(this.submitBxdParams.sbrxh)
+                this.$router.push(`${this.recordPath}${this.submitBxdParams.sbrxh}`)
+              }
+            })
+          }).catch(() => {
+            this.loading = false
+            this.submitText = '重新提交'
+            this.$toast({
+              message: '申请返工失败，请重试',
+              icon: this.icons + 'tip_info@2x.png',
+              duration: 1500
+            })
+          });
+        } else {
+          BxdServlet(this.submitBxdParams).then(() => {
+            this.loading = false
+            this.$toast({
+              message: '申报已提交',
+              icon: this.icons + 'icon_suc@2x.png',
+              duration: 1500,
+              onClose: async () => {
+                this.resetForm('ruleForm')
+                await this.fetchData(this.submitBxdParams.sbrxh)
+                this.$router.push(`${this.recordPath}${this.submitBxdParams.sbrxh}`)
+              }
+            })
+          }).catch(() => {
+            this.loading = false
+            this.submitText = '重新提交'
+            this.$toast({
+              message: '申报失败，请重试',
+              icon: this.icons + 'tip_info@2x.png',
+              duration: 1500
+            })
+          });
+        }
       },
       /**
        * 重置表单

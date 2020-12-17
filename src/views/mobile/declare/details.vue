@@ -225,6 +225,11 @@
             <van-button class="button-item warning" type="warning" size="large" round @click.prevent="evaluateAddDialog = true">追加评价</van-button>
           </template>
         </div>
+        <div class="button">
+          <template v-if="eid && bxdInfo.state == 2">
+            <van-button class="button-item primary" type="warning" size="large" round @click="toRework">我要返工</van-button>
+          </template>
+        </div>
       </div>
       <div v-else class="no-data">
         <no-data-show></no-data-show>
@@ -675,6 +680,18 @@
             duration: 1500
           })
         })
+      },
+      /**
+       * 申请返工
+       */
+      toRework() {
+        let param = {
+          'jid': this.authInfo.ybid,
+          'bid': this.bxdInfo.id
+        }
+        // 存储值：将对象转换为Json字符串
+        sessionStorage.setItem('param', JSON.stringify(param));
+        this.$router.push(config.declarePath)
       },
       /**
        * 撤回申报

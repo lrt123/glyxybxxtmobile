@@ -31,10 +31,10 @@
             break
           case 2:
             query = {
-              xm: '接单人',
-              xh: '11',
+              xm: 'lisi',
+              xh: '2019',
               sf: 2,
-              ybid: 11,
+              ybid: 9871564,
               eid: 1
             }
             break
