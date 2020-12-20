@@ -159,6 +159,25 @@
                     :key="item.id"
                     :title="item.mc">
                     <template #extra>
+                      <span  v-if="item.xh" class="hcxh orange-txt">{{item.xh}}</span>
+                      <span class="my-tag orange-txt">{{item.sl}}</span>
+                      <span class="unit orange-txt">{{item.dw}}</span>
+                    </template>
+                  </van-cell>
+                </van-cell-group>
+              </div>
+            </div>
+            <div v-if="fghc.length >0" class="container-item">
+              <div  class="container-item-left">返工耗材：</div>
+              <div class="container-item-right gs">
+                <van-cell-group>
+                  <van-cell
+                    class="my-van-cell"
+                    v-for="item in fghc"
+                    :key="item.id"
+                    :title="item.mc">
+                    <template #extra>
+                      <span  v-if="item.xh" class="hcxh orange-txt">{{item.xh}}</span>
                       <span class="my-tag orange-txt">{{item.sl}}</span>
                       <span class="unit orange-txt">{{item.dw}}</span>
                     </template>
@@ -220,7 +239,7 @@
 <!--              {{ bxdInfo.hc ? '修改耗材和工时' : '填写耗材和工时' }}-->
               填写耗材和工时
             </van-button>
-            <van-button class="button-item complete" type="primary" size="large" round @click.prevent="submitHc">完成工单
+            <van-button v-if="completeBtn" class="button-item complete" type="primary" size="large" round @click.prevent="submitHc">完成工单
             </van-button>
           </template>
         </div>
@@ -266,7 +285,9 @@
               :key="item.id"
               class="hc"
             >
-              <div class="hc-name">{{item.mc}}</div>
+              <div class="hc-name">
+             {{item.mc}}
+              </div>
               <van-stepper class="hc-sl" v-model="item.sl" :min="0" input-width="50px" button-size="26px" />
               <div class="hc-dw">{{item.dw}}</div>
               <van-icon class="hc-del" :name="icons + 'icon_delete_s@2x.png'" @click="removeHc(item.id)" />
@@ -320,7 +341,9 @@
     components: {noDataShow},
     data() {
       return {
-        disupdate:true,//设置修改耗材按钮
+        fghc:[],
+        completeBtn:false,
+        disupdate:false,//设置修改耗材按钮
         showType: 'img', // img或vedio申报人上传的是图片还是视频
         popupShow: false, // 顶部弹出popup
         popupText: '',
@@ -373,7 +396,7 @@
       },
       // 内容区显示耗材列表
       showHc() {
-        return (this.bxdInfo.state == 2 && this.bxdInfo.hc) || this.hc.leng // 如果报修单为已维修且有耗材，则显示
+        return (this.bxdInfo.state == 2 && this.bxdInfo.hc) || this.hc.length // 如果报修单为已维修且有耗材，则显示
       },
       // 显示选择耗材和完成工单按钮
       showCompleteButton() {
@@ -399,13 +422,26 @@
           }).then(res => {
             if (res.obj && res.obj.hlist) {
               this.hclist = res.obj.hlist.map(item => {
-                return {
-                  id: item.id,
-                  mc: item.mc,
-                  name: item.mc + '(' + item.dw +')',
-                  dw: item.dw,
+                if(item.xh !== null){
+                  return {
+                    id: item.id,
+                    mc: item.mc,
+                    name: item.mc + '(' + item.xh +')'+ '(' + item.dw +')',
+                    dw: item.dw,
+                    xh:item.xh
+                  }
+                }else{
+                  return {
+                    id: item.id,
+                    mc: item.mc,
+                    name: item.mc + '(' + item.dw +')',
+                    dw: item.dw,
+                    xh:item.xh
+                  }
                 }
+
               })
+
             } else {
               this.$notify({ type: 'warning', message: '数据异常', duration: 1000 })
             }          
@@ -436,11 +472,26 @@
           this.toast.clear()
           if (response.obj.blist && response.obj.blist.length > 0) {
             this.bxdInfo = response.obj.blist[0]
-            if(this.bxdInfo.hc && this.bxdInfo.shy1state != '2'&& this.bxdInfo.shy2state != '2'){
-              this.disupdate = false;
+            let str = this.bxdInfo.hc;
+            let length = str.length;
+            let fsStart = str.indexOf("返");
+            let fgEnd = str.indexOf(":");
+            if(fsStart !== -1){
+              let hc = str.substring(0,fsStart-1);
+              let fghc = str.substring(fgEnd+1,length)
+              this.bxdInfo.hc = hc;
+              this.formatFghc(fghc)
+            }else{
+              this.bxdInfo.hc = str;
+            }
+            if(this.bxdInfo.hc == '' ){
+              this.disupdate = true;
             }
             if (this.bxdInfo.shy1state == '2' || this.bxdInfo.shy2state == '2'){
               this.disupdate = true;
+            }
+            if (this.bxdInfo.shy1state == '1' || this.bxdInfo.shy2state == '1'){
+              this.completeBtn = true;
             }
             this.resetBxdInfo()
           }
@@ -609,6 +660,24 @@
           })
         })
       },
+      //返工耗材
+      formatFghc(hc) {
+        hc = copyObj(hc)
+        if (this.hclist.length > 0) {
+          let hcArr = hc.split('|') // 1-5  6-20
+          this.fghc = hcArr.map(v => {
+            let item = v.split('-') // item[0]是耗材id，item[1]是耗材数量
+            let hcItem = this.hclist.filter(k => k.id == item[0])[0]
+            return {
+              id: hcItem.id,
+              mc: hcItem.mc,
+              sl: item[1],
+              dw: hcItem.dw,
+              xh: hcItem.xh
+            }
+          })
+        }
+      },
       /**
        * 根据接口返回格式组装数据
        */
@@ -624,6 +693,7 @@
               mc: hcItem.mc,
               sl: item[1],
               dw: hcItem.dw,
+              xh: hcItem.xh
             }
           })
         }
@@ -787,7 +857,8 @@
             id: item.id,
             mc: item.mc,
             sl: 1,
-            dw: item.dw
+            dw: item.dw,
+            xh:item.xh
           })
         }
       },
@@ -818,7 +889,7 @@
           gs: this.gs // 所需工时
         }).then(res => {
           this.hcDialog = false // 隐藏弹框
-          this.disupdate = false;
+          // this.disupdate = false;
           if (res.status === 'success') {
             this.$toast({
               message: '提交成功',
@@ -1184,6 +1255,12 @@
               padding: 10px 0;
               font-size: 30px;
 
+              .hcxh{
+                height: 44px;
+                line-height: 44px;
+                text-align: center;
+                font-size: 32px;
+              }
               .my-tag {
                 display: inline-block;
                 width: 44px;
