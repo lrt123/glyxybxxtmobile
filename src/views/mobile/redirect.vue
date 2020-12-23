@@ -16,7 +16,7 @@
       let query = this.$route.query
       let mock = true;
       if (mock) {
-        let sf = 2
+        let sf = 1
         // 身份信息：1学生，2接单人，3审核员
         switch (sf) {
           case 1:
@@ -31,20 +31,25 @@
             break
           case 2:
             query = {
-              xm: 'lisi',
-              xh: '2019',
+              xm: '兰师傅',
+              xh: '1700610606',
               sf: 2,
-              ybid: 9871564,
+              ybid: 2754625,
               eid: 1
             }
             break
           case 3:
             query = {
-              xm: '审核员',
-              xh: '888',
+              xm: '陈审核',
+              xh: '1700652716',
               sf: 3,
-              ybid: 'op',
+              ybid: 9282718,
               eid: 1
+              // xm: '高审核',
+              // xh: '1700829823', //gh
+              // sf: 3,
+              // ybid: '8271635', //ybid
+              // eid: 1
             }
             break
         }

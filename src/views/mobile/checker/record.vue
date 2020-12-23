@@ -494,7 +494,7 @@
 
         .state {
           position: absolute;
-          bottom: 40px;
+          bottom: 18px;
           right: 36px;
           width: 176px;
           height: 64px;
