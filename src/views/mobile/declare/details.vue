@@ -244,7 +244,7 @@
           </template>
         </div>
         <div class="button">
-          <template v-if="eid && bxdInfo.state == 2">
+          <template v-if="eid && bxdInfo.fgts>0 && bxdInfo.state == 2 || bxdInfo.state == 4">
             <van-button class="button-item primary" type="warning" size="large" round @click="toRework">我要返工</van-button>
           </template>
         </div>
@@ -415,7 +415,8 @@
       },
       // 显示评分区块
       showScore() {
-        return this.bxdInfo.state === 2 // 申报单状态必须为2已维修的情况下
+        // return this.bxdInfo.state === 2 // 申报单状态必须为2已维修的情况下
+        return this.bxdInfo.state === 4 // 申报单状态必须为4已验收的情况下
       },
       // bxdInfo赋值之后再渲染
       showBxdInfo() {
@@ -423,7 +424,8 @@
       },
       // 未评价
       unevaluated() {
-        return this.bxdInfo.state === 2 && !this.bxdInfo.pj // 申报单状态必须为2已维修，评价星级pj为未填的情况下
+        // return this.bxdInfo.state === 2 && !this.bxdInfo.pj // 申报单状态必须为2已维修，评价星级pj为未填的情况下
+        return this.bxdInfo.state === 4 && !this.bxdInfo.pj // 申报单状态必须为4已验收，评价星级pj为未填的情况下
       },
       // 二维码id，判断是否扫码进入的
       eid() {
@@ -570,7 +572,7 @@
           bxdInfo.s2.tag = s2.tag
         }
 
-        // 报修单状态，0未派单，1已派单，2已维修，3撤销单
+        // 报修单状态，0未派单，1已派单，2已维修，3撤销单，4已验收
         bxdInfo.state = Number(bxdInfo.state)
 
         // 添加进度步骤
@@ -587,8 +589,12 @@
           step.active = 1
           step1()
           step2()
-        } else if (state === 2) { // 已维修
+        } else if (state === 2) { // 已维修 还没有结束 只有验收了才是结束
           step.active = 2
+          step1()
+          step2()
+        } else if( state === 4) {  //已验收
+          step.active = 4
           step1()
           step2()
           step3()
@@ -642,9 +648,9 @@
 
         function step3() {
           step.steps.push({
-            title: '已完成',
+            title: '已验收',
             time: me.bxdInfo.wxsj ? me.$moment(me.bxdInfo.wxsj).format(me.format) : '--',
-            desc: '维修工作已完成.'
+            desc: '维修工作已完成，如有问题请返工.'
           })
         }
 
