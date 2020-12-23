@@ -147,7 +147,7 @@
             <div class="container-item">
               <div class="container-item-left">邮箱：</div>
               <!--              <div class="container-item-right" v-if="isQrcode && isEncry">{{ encryEmail(bxdInfo.j.email) }}</div>-->
-              <div class="container-item-right">{{ bxdInfo.j.email }}</div>
+              <div class="container-item-right">{{ bxdInfo.j.yx }}</div>
             </div>
             <div class="container-item">
               <div class="container-item-left">耗材：</div>
@@ -188,7 +188,7 @@
             <div class="container-item">
               <div class="container-item-left">工时：</div>
               <div class="container-item-right orange-txt">
-                <span v-if="hc">{{gs}} </span>
+                <span v-if="hc">{{bxdInfo.gs}} </span>
                 <span v-else>--</span>
               </div>
             </div>
@@ -236,8 +236,7 @@
         <div class="button">
           <template v-if="showCompleteButton">
             <van-button v-if="disupdate" class="button-item select" type="info" size="large" round @click.prevent="hcDialog = true">
-<!--              {{ bxdInfo.hc ? '修改耗材和工时' : '填写耗材和工时' }}-->
-              填写耗材和工时
+              {{ bxdInfo.hc ? '修改耗材和工时' : '填写耗材和工时' }}
             </van-button>
             <van-button v-if="completeBtn" class="button-item complete" type="primary" size="large" round @click.prevent="submitHc">完成工单
             </van-button>
@@ -341,7 +340,7 @@
     components: {noDataShow},
     data() {
       return {
-        fghc:[],
+        fghc:[],//返工耗材
         completeBtn:false,
         disupdate:false,//设置修改耗材按钮
         showType: 'img', // img或vedio申报人上传的是图片还是视频
@@ -472,25 +471,29 @@
           this.toast.clear()
           if (response.obj.blist && response.obj.blist.length > 0) {
             this.bxdInfo = response.obj.blist[0]
-            let str = this.bxdInfo.hc;
-            let length = str.length;
-            let fsStart = str.indexOf("返");
-            let fgEnd = str.indexOf(":");
-            if(fsStart !== -1){
-              let hc = str.substring(0,fsStart-1);
-              let fghc = str.substring(fgEnd+1,length)
-              this.bxdInfo.hc = hc;
-              this.formatFghc(fghc)
-            }else{
-              this.bxdInfo.hc = str;
+            if (this.bxdInfo.hc){
+              //耗材数据处理
+              let str = this.bxdInfo.hc;
+              let length = str.length;
+              let fsStart = str.indexOf("返");
+              let fgEnd = str.indexOf(":");
+              if(fsStart !== -1){
+                let hc = str.substring(0,fsStart-1);
+                let fghc = str.substring(fgEnd+1,length)
+                this.bxdInfo.hc = hc;
+                this.formatFghc(fghc)
+              }else{
+                this.bxdInfo.hc = str;
+              }
             }
-            if(this.bxdInfo.hc == '' ){
+            //修改耗材按钮状态
+            if(this.bxdInfo.hc == ''||Object.prototype.toString.call(this.bxdInfo.hc)==='[object Null]'){
               this.disupdate = true;
             }
             if (this.bxdInfo.shy1state == '2' || this.bxdInfo.shy2state == '2'){
               this.disupdate = true;
             }
-            if (this.bxdInfo.shy1state == '1' || this.bxdInfo.shy2state == '1'){
+            if (this.bxdInfo.shy1state == '1' && this.bxdInfo.shy2state == '1'){
               this.completeBtn = true;
             }
             this.resetBxdInfo()
@@ -889,7 +892,7 @@
           gs: this.gs // 所需工时
         }).then(res => {
           this.hcDialog = false // 隐藏弹框
-          // this.disupdate = false;
+          this.disupdate = false;
           if (res.status === 'success') {
             this.$toast({
               message: '提交成功',

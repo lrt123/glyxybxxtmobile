@@ -145,7 +145,7 @@
             <div class="container-item">
               <div class="container-item-left">邮箱：</div>
               <!--              <div class="container-item-right" v-if="isQrcode && isEncry">{{ encryEmail(bxdInfo.j.email) }}</div>-->
-              <div class="container-item-right">{{ bxdInfo.j.email }}</div>
+              <div class="container-item-right">{{ bxdInfo.j.yx }}</div>
             </div>
             <div class="container-item">
               <div class="container-item-left">耗材：</div>
@@ -164,10 +164,28 @@
                 </van-cell-group>
               </div>
             </div>
+            <div v-if="fghc.length >0" class="container-item">
+              <div  class="container-item-left">返工耗材：</div>
+              <div class="container-item-right gs">
+                <van-cell-group>
+                  <van-cell
+                    class="my-van-cell"
+                    v-for="item in fghc"
+                    :key="item.id"
+                    :title="item.mc">
+                    <template #extra>
+                      <span  v-if="item.xh" class="hcxh orange-txt">{{item.xh}}</span>
+                      <span class="my-tag orange-txt">{{item.sl}}</span>
+                      <span class="unit orange-txt">{{item.dw}}</span>
+                    </template>
+                  </van-cell>
+                </van-cell-group>
+              </div>
+            </div>
             <div class="container-item">
               <div class="container-item-left">工时：</div>
               <div class="container-item-right orange-txt">
-                <span v-if="hc">{{gs}} </span>
+                <span v-if="hc">{{bxdInfo.gs}} </span>
                 <span v-else>--</span>
               </div>
             </div>
@@ -210,11 +228,9 @@
               </div>
             </div>
           </template>
-
-
         </div>
         <div class="button">
-          <template v-if="eid">
+          <template v-if="eid & bxdshystate">
             <van-button class="button-item select" type="primary" size="normal" round
                         @click.prevent="shyPass('确定通过', 1)">通过审核
             </van-button>
@@ -331,6 +347,8 @@
     components: {noDataShow},
     data() {
       return {
+        bxdshystate: true,//审核员 审核按钮状态
+        fghc:[],//返工耗材
         showType: 'img', // img或vedio申报人上传的是图片还是视频
         popupShow: false, // 顶部弹出popup
         popupText: '',
@@ -406,11 +424,22 @@
         }).then(res => {
           if (res && res.obj.hlist) {
             this.hclist = res.obj.hlist.map(item => {
-              return {
-                id: item.id,
-                mc: item.mc,
-                name: item.mc + '(' + item.dw + ')',
-                dw: item.dw,
+              if(item.xh !== null){
+                return {
+                  id: item.id,
+                  mc: item.mc,
+                  name: item.mc + '(' + item.xh +')'+ '(' + item.dw +')',
+                  dw: item.dw,
+                  xh:item.xh
+                }
+              }else{
+                return {
+                  id: item.id,
+                  mc: item.mc,
+                  name: item.mc + '(' + item.dw +')',
+                  dw: item.dw,
+                  xh:item.xh
+                }
               }
             })
           } else {
@@ -443,6 +472,24 @@
           this.toast.clear()
           if (response.obj.blist && response.obj.blist.length > 0) {
             this.bxdInfo = response.obj.blist[0]
+            console.log(this.bxdInfo);
+            //审核员审核按钮状态
+            this.bxdshystate = (getAuthInfo().ybid == this.bxdInfo.shy1) ? (this.bxdInfo.shy1state === 0 || this.bxdInfo.shy1state === 2) : (this.bxdInfo.shy2state === 0||this.bxdInfo.shy2state === 2)
+            if (this.bxdInfo.hc){
+              //耗材数据处理
+              let str = this.bxdInfo.hc;
+              let length = str.length;
+              let fsStart = str.indexOf("返");
+              let fgEnd = str.indexOf(":");
+              if(fsStart !== -1){
+                let hc = str.substring(0,fsStart-1);
+                let fghc = str.substring(fgEnd+1,length)
+                this.bxdInfo.hc = hc;
+                this.formatFghc(fghc)
+              }else{
+                this.bxdInfo.hc = str;
+              }
+            }
             this.resetBxdInfo()
           } else {
             this.toast.clear()
@@ -491,9 +538,9 @@
         this.gs = this.bxdInfo.gs
         // 评价
         bxdInfo.pj = Number(bxdInfo.pj)
-        if (bxdInfo.shy1 === this.authInfo.ybid && bxdInfo.shy1state === 1){
+        if (bxdInfo.shy1 == this.authInfo.ybid && bxdInfo.shy1state === 1){
           this.authInfo.eid = false
-        }else if (bxdInfo.shy2 === this.authInfo.ybid && bxdInfo.shy2state === 1){
+        }else if (bxdInfo.shy2 == this.authInfo.ybid && bxdInfo.shy2state === 1){
           this.authInfo.eid = false
         }
 
@@ -528,7 +575,7 @@
           step2()
         } else if (state === 2) { // 已维修
           //默认验收员为审核员1
-          if (this.bxdInfo.shy2state === 1 && this.authInfo.ybid === this.bxdInfo.shy1){
+          if (this.bxdInfo.shy1state === 1 && this.authInfo.ybid == this.bxdInfo.shy1){
             this.ysr = true
           }
           step.active = 2
@@ -648,6 +695,7 @@
                   this.getBxdDetails()
                 }
               })
+
             } else {
               this.$toast({
                 message: '提交失败',
@@ -681,6 +729,7 @@
             bid: this.bxdInfo.id, // 报修单id*
             state: state // 审核情况*，4通过，5不通过
           }).then(res => {
+            this.ysr = false
             if (res.status === 'success') {
               this.$toast({
                 message: '提交成功',
@@ -707,11 +756,29 @@
         }).catch(() => {
         })
       },
-      // add 20200901
+      //返工耗材
+      formatFghc(hc) {
+        hc = copyObj(hc)
+        if (this.hclist.length > 0) {
+          let hcArr = hc.split('|') // 1-5  6-20
+          this.fghc = hcArr.map(v => {
+            let item = v.split('-') // item[0]是耗材id，item[1]是耗材数量
+            let hcItem = this.hclist.filter(k => k.id == item[0])[0]
+            return {
+              id: hcItem.id,
+              mc: hcItem.mc,
+              sl: item[1],
+              dw: hcItem.dw,
+              xh: hcItem.xh
+            }
+          })
+        }
+      },
       /**
        * 根据接口返回格式组装数据
        */
       formatHc(hc) {
+        hc = copyObj(hc)
         if (this.hclist.length > 0) {
           let hcArr = hc.split('|') // 1-5  6-20
           this.hc = hcArr.map(v => {
@@ -722,6 +789,7 @@
               mc: hcItem.mc,
               sl: item[1],
               dw: hcItem.dw,
+              xh: hcItem.xh
             }
           })
         }
