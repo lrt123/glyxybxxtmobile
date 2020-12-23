@@ -154,7 +154,7 @@
             </div>
             <div class="container-item">
               <div class="container-item-left">邮箱：</div>
-              <div class="container-item-right">{{ bxdInfo.j.email }}</div>
+              <div class="container-item-right">{{ bxdInfo.j.yx }}</div>
             </div>
             <div class="container-item">
               <div class="container-item-left">耗材：</div>
@@ -173,10 +173,28 @@
                 </van-cell-group>
               </div>
             </div>
+            <div v-if="fghc.length >0" class="container-item">
+              <div  class="container-item-left">返工耗材：</div>
+              <div class="container-item-right gs">
+                <van-cell-group>
+                  <van-cell
+                    class="my-van-cell"
+                    v-for="item in fghc"
+                    :key="item.id"
+                    :title="item.mc">
+                    <template #extra>
+                      <span  v-if="item.xh" class="hcxh orange-txt">{{item.xh}}</span>
+                      <span class="my-tag orange-txt">{{item.sl}}</span>
+                      <span class="unit orange-txt">{{item.dw}}</span>
+                    </template>
+                  </van-cell>
+                </van-cell-group>
+              </div>
+            </div>
             <div class="container-item">
               <div class="container-item-left">工时：</div>
               <div class="container-item-right orange-txt">
-                <span v-if="hc">{{gs}} </span>
+                <span v-if="hc">{{bxdInfo.gs}} </span>
                 <span v-else>--</span>
               </div>
             </div>
@@ -355,6 +373,7 @@
     components: {noDataShow},
     data() {
       return {
+        fghc:[],//返工耗材
         showType: 'img', // img或video申报人上传的是图片还是视频
         img: false,
         video: false,
@@ -429,11 +448,22 @@
         }).then(res => {
           if (res.obj && res.obj.hlist) {
             this.hclist = res.obj.hlist.map(item => {
-              return {
-                id: item.id,
-                mc: item.mc,
-                name: item.mc + '(' + item.dw +')',
-                dw: item.dw,
+              if(item.xh !== null){
+                return {
+                  id: item.id,
+                  mc: item.mc,
+                  name: item.mc + '(' + item.xh +')'+ '(' + item.dw +')',
+                  dw: item.dw,
+                  xh:item.xh
+                }
+              }else{
+                return {
+                  id: item.id,
+                  mc: item.mc,
+                  name: item.mc + '(' + item.dw +')',
+                  dw: item.dw,
+                  xh:item.xh
+                }
               }
             })
           } else {
@@ -466,6 +496,23 @@
           this.toast.clear()
           if (response.obj.blist && response.obj.blist.length > 0) {
             this.bxdInfo = response.obj.blist[0]
+            console.log( this.bxdInfo)
+            if (this.bxdInfo.hc){
+              //耗材数据处理
+              let str = this.bxdInfo.hc;
+              let length = str.length;
+              let fsStart = str.indexOf("返");
+              let fgEnd = str.indexOf(":");
+              if(fsStart !== -1){
+                let hc = str.substring(0,fsStart-1);
+                let fghc = str.substring(fgEnd+1,length)
+                this.bxdInfo.hc = hc;
+                this.formatFghc(fghc)
+              }else{
+                this.bxdInfo.hc = str;
+              }
+            }
+
             this.resetBxdInfo()
           }
         }).catch(() => {
@@ -745,12 +792,28 @@
           })
         })
       },
+      //返工耗材
+      formatFghc(hc) {
+        hc = copyObj(hc)
+        if (this.hclist.length > 0) {
+          let hcArr = hc.split('|') // 1-5  6-20
+          this.fghc = hcArr.map(v => {
+            let item = v.split('-') // item[0]是耗材id，item[1]是耗材数量
+            let hcItem = this.hclist.filter(k => k.id == item[0])[0]
+            return {
+              id: hcItem.id,
+              mc: hcItem.mc,
+              sl: item[1],
+              dw: hcItem.dw,
+              xh: hcItem.xh
+            }
+          })
+        }
+      },
       /**
        * 根据接口返回格式组装数据
        */
       formatHc(hc) {
-        if (!hc)
-          return
         hc = copyObj(hc)
         if (this.hclist.length > 0) {
           let hcArr = hc.split('|') // 1-5  6-20
@@ -762,6 +825,7 @@
               mc: hcItem.mc,
               sl: item[1],
               dw: hcItem.dw,
+              xh: hcItem.xh
             }
           })
         }
@@ -1104,6 +1168,34 @@
             line-height: 44px;
             color: rgba(74, 88, 96, .8);
             position: relative;
+
+            .my-van-cell {
+              padding: 10px 0;
+              font-size: 30px;
+
+              .hcxh{
+                height: 44px;
+                line-height: 44px;
+                text-align: center;
+                font-size: 32px;
+              }
+              .my-tag {
+                display: inline-block;
+                width: 44px;
+                height: 44px;
+                line-height: 44px;
+                text-align: center;
+                font-size: 32px;
+              }
+            }
+
+            .unit {
+              font-size: 28px;
+              margin-left: 5px;
+            }
+            .orange-txt {
+              color: #ff8721;
+            }
 
             .tel {
               position: absolute;
