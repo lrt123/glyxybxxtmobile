@@ -472,9 +472,12 @@
           this.toast.clear()
           if (response.obj.blist && response.obj.blist.length > 0) {
             this.bxdInfo = response.obj.blist[0]
-            console.log(this.bxdInfo);
             //审核员审核按钮状态
-            this.bxdshystate = (getAuthInfo().ybid == this.bxdInfo.shy1) ? (this.bxdInfo.shy1state === 0 || this.bxdInfo.shy1state === 2) : (this.bxdInfo.shy2state === 0||this.bxdInfo.shy2state === 2)
+            let stateParam = sessionStorage.getItem('bxdshystate');
+            this.bxdshystate = (getAuthInfo().ybid == this.bxdInfo.shy1) ?
+              (this.bxdInfo.shy1state === 0 || this.bxdInfo.shy1state === 2)
+              :
+              (this.bxdInfo.shy2state === 0 || this.bxdInfo.shy2state === 2) || stateParam
             if (this.bxdInfo.hc){
               //耗材数据处理
               let str = this.bxdInfo.hc;

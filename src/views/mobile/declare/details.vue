@@ -757,6 +757,8 @@
         }
         // 存储值：将对象转换为Json字符串
         sessionStorage.setItem('param', JSON.stringify(param));
+        let bxdshystate = true
+        sessionStorage.setItem("bxdshystate",bxdshystate)
         this.$router.push(config.declarePath)
       },
       /**
