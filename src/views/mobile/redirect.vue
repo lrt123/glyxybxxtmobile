@@ -14,7 +14,7 @@
     },
     mounted() {
       let query = this.$route.query
-      let mock = true;
+      let mock = false;
       if (mock) {
         let sf = 2
         // 身份信息：1学生，2接单人，3审核员

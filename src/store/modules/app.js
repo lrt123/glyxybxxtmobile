@@ -9,7 +9,9 @@ const state = {
   size: Cookies.get('size') || 'medium',
   config: {
     //上线修改，考虑初次访问时设置
-    bxdimg: "http://localhost:8089/bxdimg"
+    bxdimg: "https://yiban.glmc.edu.cn/bx/bxdimg",
+    // redirect: "https://yiban.glmc.edu.cn/bx"
+    redirect: "http://localhost:8089/bx"
   }
 }
 

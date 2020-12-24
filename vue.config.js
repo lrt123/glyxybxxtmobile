@@ -12,7 +12,7 @@ const port = process.env.port || process.env.npm_config_port || 80// dev port
 
 // All configuration item explanations can be find in https://cli.vuejs.org/config/
 module.exports = {
-  
+
   // 部署应用的基本url  可用 process.env.NODE_ENV 环境变量控制
   publicPath: '/bxqt',
 
@@ -40,7 +40,7 @@ module.exports = {
       // detail: https://cli.vuejs.org/config/#devserver-proxy
       [process.env.VUE_APP_BASE_API]: {
         // target: 'http://yiban.gxun.edu.cn/bx',
-        target: 'http://localhost:8089/',
+        target: 'http://localhost:8089/bx',
         ws: false,
         secure: true, // 如果是https接口，需要配置这个参数
         changeOrigin: true,

@@ -1,11 +1,15 @@
 {
-  "title":    "桂林医学院报修系统",
-//  "api":      "http://yiban.gxun.edu.cn/bx",
-  "api":     "https://localhost:8089/",
-//  "bxdimg":   "http://yiban.gxun.edu.cn/bx/bxdimg",
-  "bxdimg":   "http://localhost/bxdimg",
-//  "redirect": "http://yiban.gxun.edu.cn/bx/index.jsp",
-  "redirect": "http://localhost:8089/index",
-  "jdrtime": 0,
-  "shytime": 0
+  "title":   "桂林医学院报修管理系统",
+  "api":     "https://yiban.glmc.edu.cn/bx",
+  "bxdimg":  "https://yiban.glmc.edu.cn/bx/bxdimg",
+  "qrcode":  "https://yiban.glmc.edu.cn/bx?eid=",
+  "bxqtUrl": "https://yiban.glmc.edu.cn/bxqt/#/",
+  "indextime": 60,
+  "qygltime": 60,
+  "bxdtime": null,
+  "jdrtime": null,
+  "shytime": null,
+  "mapwidth": "1400px",
+  "mapheight": "750px"
 }
+

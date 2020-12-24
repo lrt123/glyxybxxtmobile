@@ -1,6 +1,6 @@
 export default {
   // 报修单图片地址
-  // bxdimg: 'http://yiban.gxun.edu.cn/bx/bxdimg/',
+  bxdimg: 'http://yiban.gxun.edu.cn/bx/bxdimg/',
   // 服务器图标路径
   icons: 'http://yiban.glmc.edu.cn/icons/',
   // 易班授权重定向页面 后台定死，无需修改

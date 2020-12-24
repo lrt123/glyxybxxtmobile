@@ -4,7 +4,7 @@ import { responseErrorNotify } from './common';
 
 // create an axios instance
 const service = axios.create({
-  // baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
+  baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   // withCredentials: true,  // `withCredentials` 表示跨域请求时是否需要使用凭证
   transformRequest: [function(data) {
     return qs.stringify(data)

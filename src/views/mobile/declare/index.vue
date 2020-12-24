@@ -365,9 +365,6 @@
           this.submitBxdParams.bxlb = '';
         } else {
           this.submitBxdParams.bxlb = currentVal[0]+'-'+currentVal[1];
-          console.log(currentVal);
-          console.log(typeof currentVal);
-          console.log(this.submitBxdParams.bxlb);
 
         }
       },
