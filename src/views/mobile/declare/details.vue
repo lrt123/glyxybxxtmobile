@@ -498,7 +498,6 @@
           this.toast.clear()
           if (response.obj.blist && response.obj.blist.length > 0) {
             this.bxdInfo = response.obj.blist[0]
-            console.log( this.bxdInfo)
             if (this.bxdInfo.hc){
               //耗材数据处理
               let str = this.bxdInfo.hc;
@@ -629,12 +628,19 @@
           if (me.bxdInfo.j) {
             let xm = me.bxdInfo.j.xm
             let tel = me.bxdInfo.j.sj
+
             if (me.isEncry) { // 扫描二维码打开的情况下，加密电话并且不能拨打
               desc = tel ? `系统已自动派单给维修师傅<span class="name">${xm}</span>(手机：<a class="tel">${encryPhoneNumber(tel)}</a>)，等待处理...`
-                : `系统已自动派单给维修师傅<span class="name">${xm}</span>，等待处理...`
-            } else {
+                : `系统已自动派单给维修师傅<span class="name">${xm}</span>，等待处理...`;
+              if(me.bxdInfo.state == 2) {
+                desc = '当前订单已完成修理，等待验收，如出现问题，可以申请返工。'
+              }
+            }else {
               desc = tel ? `系统已自动派单给维修师傅<span class="name">${xm}</span>(手机：<a class="tel" href="tel:${tel}">${tel}</a>)，等待处理...`
-                : `系统已自动派单给维修师傅<span class="name">${xm}</span>，等待处理...`
+                : `系统已自动派单给维修师傅<span class="name">${xm}</span>，等待处理...`;
+              if(me.bxdInfo.state == 2) {
+                desc = '当前订单已完成修理，等待验收，如出现问题，可以申请返工。'
+              }
             }
           } else {
             desc = '等待管理员指派维修师傅，请耐心等待...'
