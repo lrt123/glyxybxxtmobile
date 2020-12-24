@@ -39,8 +39,8 @@ module.exports = {
       // change xxx-api/login => mock/login
       // detail: https://cli.vuejs.org/config/#devserver-proxy
       [process.env.VUE_APP_BASE_API]: {
-        // target: 'http://yiban.gxun.edu.cn/bx',
-        target: 'http://localhost:8089/bx',
+        target: 'http://yiban.gxun.edu.cn/bx',
+        // target: 'http://localhost:8089/bx',
         ws: false,
         secure: true, // 如果是https接口，需要配置这个参数
         changeOrigin: true,

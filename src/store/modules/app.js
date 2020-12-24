@@ -10,8 +10,8 @@ const state = {
   config: {
     //上线修改，考虑初次访问时设置
     bxdimg: "https://yiban.glmc.edu.cn/bx/bxdimg",
-    // redirect: "https://yiban.glmc.edu.cn/bx"
-    redirect: "http://localhost:8089/bx"
+    redirect: "https://yiban.glmc.edu.cn/bx"
+    // redirect: "http://localhost:8089/bx"
   }
 }
 
