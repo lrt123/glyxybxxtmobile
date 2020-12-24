@@ -245,6 +245,11 @@
         </div>
         <div class="button">
           <template v-if="eid && bxdInfo.fgts>0 && bxdInfo.state == 2 || bxdInfo.state == 4">
+            <el-collapse>
+              <el-collapse-item title="返工说明">
+                <div>您本次报修单的返工天数还剩余：<span>{{bxdInfo.fgts}}</span>天，若出现问题，请申请返工或联系后勤处</div>
+              </el-collapse-item>
+            </el-collapse>
             <van-button class="button-item primary" type="warning" size="large" round @click="toRework">我要返工</van-button>
           </template>
         </div>
