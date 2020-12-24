@@ -154,7 +154,7 @@
             </div>
             <div class="container-item">
               <div class="container-item-left">邮箱：</div>
-              <div class="container-item-right">{{ bxdInfo.j.email }}</div>
+              <div class="container-item-right">{{ bxdInfo.j.yx }}</div>
             </div>
             <div class="container-item">
               <div class="container-item-left">耗材：</div>
@@ -173,10 +173,28 @@
                 </van-cell-group>
               </div>
             </div>
+            <div v-if="fghc.length >0" class="container-item">
+              <div  class="container-item-left">返工耗材：</div>
+              <div class="container-item-right gs">
+                <van-cell-group>
+                  <van-cell
+                    class="my-van-cell"
+                    v-for="item in fghc"
+                    :key="item.id"
+                    :title="item.mc">
+                    <template #extra>
+                      <span  v-if="item.xh" class="hcxh orange-txt">{{item.xh}}</span>
+                      <span class="my-tag orange-txt">{{item.sl}}</span>
+                      <span class="unit orange-txt">{{item.dw}}</span>
+                    </template>
+                  </van-cell>
+                </van-cell-group>
+              </div>
+            </div>
             <div class="container-item">
               <div class="container-item-left">工时：</div>
               <div class="container-item-right orange-txt">
-                <span v-if="hc">{{gs}} </span>
+                <span v-if="hc">{{bxdInfo.gs}} </span>
                 <span v-else>--</span>
               </div>
             </div>
@@ -226,7 +244,12 @@
           </template>
         </div>
         <div class="button">
-          <template v-if="eid && bxdInfo.state == 2">
+          <template v-if="eid && bxdInfo.fgts>0 && bxdInfo.state == 2 || bxdInfo.state == 4">
+            <el-collapse>
+              <el-collapse-item title="返工说明">
+                <div>您本次报修单的返工天数还剩余：<span>{{bxdInfo.fgts}}</span>天，若出现问题，请申请返工或联系后勤处</div>
+              </el-collapse-item>
+            </el-collapse>
             <van-button class="button-item primary" type="warning" size="large" round @click="toRework">我要返工</van-button>
           </template>
         </div>
@@ -355,6 +378,7 @@
     components: {noDataShow},
     data() {
       return {
+        fghc:[],//返工耗材
         showType: 'img', // img或video申报人上传的是图片还是视频
         img: false,
         video: false,
@@ -396,7 +420,8 @@
       },
       // 显示评分区块
       showScore() {
-        return this.bxdInfo.state === 2 // 申报单状态必须为2已维修的情况下
+        // return this.bxdInfo.state === 2 // 申报单状态必须为2已维修的情况下
+        return this.bxdInfo.state === 4 // 申报单状态必须为4已验收的情况下
       },
       // bxdInfo赋值之后再渲染
       showBxdInfo() {
@@ -404,7 +429,8 @@
       },
       // 未评价
       unevaluated() {
-        return this.bxdInfo.state === 2 && !this.bxdInfo.pj // 申报单状态必须为2已维修，评价星级pj为未填的情况下
+        // return this.bxdInfo.state === 2 && !this.bxdInfo.pj // 申报单状态必须为2已维修，评价星级pj为未填的情况下
+        return this.bxdInfo.state === 4 && !this.bxdInfo.pj // 申报单状态必须为4已验收，评价星级pj为未填的情况下
       },
       // 二维码id，判断是否扫码进入的
       eid() {
@@ -429,11 +455,22 @@
         }).then(res => {
           if (res.obj && res.obj.hlist) {
             this.hclist = res.obj.hlist.map(item => {
-              return {
-                id: item.id,
-                mc: item.mc,
-                name: item.mc + '(' + item.dw +')',
-                dw: item.dw,
+              if(item.xh !== null){
+                return {
+                  id: item.id,
+                  mc: item.mc,
+                  name: item.mc + '(' + item.xh +')'+ '(' + item.dw +')',
+                  dw: item.dw,
+                  xh:item.xh
+                }
+              }else{
+                return {
+                  id: item.id,
+                  mc: item.mc,
+                  name: item.mc + '(' + item.dw +')',
+                  dw: item.dw,
+                  xh:item.xh
+                }
               }
             })
           } else {
@@ -466,6 +503,22 @@
           this.toast.clear()
           if (response.obj.blist && response.obj.blist.length > 0) {
             this.bxdInfo = response.obj.blist[0]
+            if (this.bxdInfo.hc){
+              //耗材数据处理
+              let str = this.bxdInfo.hc;
+              let length = str.length;
+              let fsStart = str.indexOf("返");
+              let fgEnd = str.indexOf(":");
+              if(fsStart !== -1){
+                let hc = str.substring(0,fsStart-1);
+                let fghc = str.substring(fgEnd+1,length)
+                this.bxdInfo.hc = hc;
+                this.formatFghc(fghc)
+              }else{
+                this.bxdInfo.hc = str;
+              }
+            }
+
             this.resetBxdInfo()
           }
         }).catch(() => {
@@ -523,7 +576,7 @@
           bxdInfo.s2.tag = s2.tag
         }
 
-        // 报修单状态，0未派单，1已派单，2已维修，3撤销单
+        // 报修单状态，0未派单，1已派单，2已维修，3撤销单，4已验收
         bxdInfo.state = Number(bxdInfo.state)
 
         // 添加进度步骤
@@ -540,8 +593,12 @@
           step.active = 1
           step1()
           step2()
-        } else if (state === 2) { // 已维修
+        } else if (state === 2) { // 已维修 还没有结束 只有验收了才是结束
           step.active = 2
+          step1()
+          step2()
+        } else if( state === 4) {  //已验收
+          step.active = 4
           step1()
           step2()
           step3()
@@ -576,12 +633,19 @@
           if (me.bxdInfo.j) {
             let xm = me.bxdInfo.j.xm
             let tel = me.bxdInfo.j.sj
+
             if (me.isEncry) { // 扫描二维码打开的情况下，加密电话并且不能拨打
               desc = tel ? `系统已自动派单给维修师傅<span class="name">${xm}</span>(手机：<a class="tel">${encryPhoneNumber(tel)}</a>)，等待处理...`
-                : `系统已自动派单给维修师傅<span class="name">${xm}</span>，等待处理...`
-            } else {
+                : `系统已自动派单给维修师傅<span class="name">${xm}</span>，等待处理...`;
+              if(me.bxdInfo.state == 2) {
+                desc = '当前订单已完成修理，等待验收，如出现问题，可以申请返工。'
+              }
+            }else {
               desc = tel ? `系统已自动派单给维修师傅<span class="name">${xm}</span>(手机：<a class="tel" href="tel:${tel}">${tel}</a>)，等待处理...`
-                : `系统已自动派单给维修师傅<span class="name">${xm}</span>，等待处理...`
+                : `系统已自动派单给维修师傅<span class="name">${xm}</span>，等待处理...`;
+              if(me.bxdInfo.state == 2) {
+                desc = '当前订单已完成修理，等待验收，如出现问题，可以申请返工。'
+              }
             }
           } else {
             desc = '等待管理员指派维修师傅，请耐心等待...'
@@ -595,9 +659,9 @@
 
         function step3() {
           step.steps.push({
-            title: '已完成',
+            title: '已验收',
             time: me.bxdInfo.wxsj ? me.$moment(me.bxdInfo.wxsj).format(me.format) : '--',
-            desc: '维修工作已完成.'
+            desc: '维修工作已完成，如有问题请返工.'
           })
         }
 
@@ -693,6 +757,8 @@
         }
         // 存储值：将对象转换为Json字符串
         sessionStorage.setItem('param', JSON.stringify(param));
+        let bxdshystate = true
+        sessionStorage.setItem("bxdshystate",bxdshystate)
         this.$router.push(config.declarePath)
       },
       /**
@@ -745,12 +811,28 @@
           })
         })
       },
+      //返工耗材
+      formatFghc(hc) {
+        hc = copyObj(hc)
+        if (this.hclist.length > 0) {
+          let hcArr = hc.split('|') // 1-5  6-20
+          this.fghc = hcArr.map(v => {
+            let item = v.split('-') // item[0]是耗材id，item[1]是耗材数量
+            let hcItem = this.hclist.filter(k => k.id == item[0])[0]
+            return {
+              id: hcItem.id,
+              mc: hcItem.mc,
+              sl: item[1],
+              dw: hcItem.dw,
+              xh: hcItem.xh
+            }
+          })
+        }
+      },
       /**
        * 根据接口返回格式组装数据
        */
       formatHc(hc) {
-        if (!hc)
-          return
         hc = copyObj(hc)
         if (this.hclist.length > 0) {
           let hcArr = hc.split('|') // 1-5  6-20
@@ -762,6 +844,7 @@
               mc: hcItem.mc,
               sl: item[1],
               dw: hcItem.dw,
+              xh: hcItem.xh
             }
           })
         }
@@ -1104,6 +1187,34 @@
             line-height: 44px;
             color: rgba(74, 88, 96, .8);
             position: relative;
+
+            .my-van-cell {
+              padding: 10px 0;
+              font-size: 30px;
+
+              .hcxh{
+                height: 44px;
+                line-height: 44px;
+                text-align: center;
+                font-size: 32px;
+              }
+              .my-tag {
+                display: inline-block;
+                width: 44px;
+                height: 44px;
+                line-height: 44px;
+                text-align: center;
+                font-size: 32px;
+              }
+            }
+
+            .unit {
+              font-size: 28px;
+              margin-left: 5px;
+            }
+            .orange-txt {
+              color: #ff8721;
+            }
 
             .tel {
               position: absolute;

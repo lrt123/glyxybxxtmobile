@@ -47,7 +47,7 @@ export function filterParams(params) {
  * @param state
  */
 export function getBxdShState(state) {
-  let v = config.shState.filnter(v => v.value == Number(state))[0]
+  let v = config.shState.filter(v => v.value == Number(state))[0]
   return v
 }
 

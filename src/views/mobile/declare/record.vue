@@ -8,7 +8,7 @@
       <div v-if="blist.length">
         <div
           v-for="(item, index) in handleBlist"
-          :class="['main-content-item', { 'completed': item.state === 2 || item.state === 3 }]"
+          :class="['main-content-item', { 'completed': item.state === 4 || item.state === 3 }]"
           :key="index"
           @click="onItemClick(item)"
         >
@@ -233,7 +233,7 @@
 
         .state {
           position: absolute;
-          bottom: 40px;
+          bottom: 18px;
           right: 36px;
           width: 176px;
           height: 64px;

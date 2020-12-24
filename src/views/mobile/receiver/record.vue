@@ -200,12 +200,15 @@
       getGs() {
         JdrServlet({
           op: 'selgs',
-          ybid: this.authInfo.ybid
+          jid: this.authInfo.ybid
         }).then(res => {
-          this.gs = res.obj && res.obj.gs
+            this.gs = res.obj.gs
+          if (this.gs >2){
+            this.gs = 2
+          }
         })
       },
-      formatGs(percentage) {
+      formatGs() {
         let multiplier = 100
         let gs = (2 * multiplier - this.gs * multiplier) / 100 // ×100 防止精度丢失
         return `${gs}`;
@@ -506,7 +509,7 @@
 
         .state {
           position: absolute;
-          bottom: 40px;
+          bottom: 18px;
           right: 36px;
           width: 176px;
           height: 64px;
