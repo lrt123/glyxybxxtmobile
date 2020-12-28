@@ -594,7 +594,7 @@
           step1()
           step2()
         } else if (state === 2) { // 已维修 还没有结束 只有验收了才是结束
-          step.active = 2
+          step.active = 1
           step1()
           step2()
         } else if( state === 4) {  //已验收
@@ -613,6 +613,10 @@
             step1()
             step4()
           }
+        }else if (state === 5){ // 验收未通过
+          step.active = 1;
+          step1();
+          step2();
         }
         this.bxdInfo = Object.assign({}, this.bxdInfo, {
           step: step
@@ -629,7 +633,8 @@
         }
 
         function step2() {
-          let desc
+          let desc;
+          let title = '维修中';
           if (me.bxdInfo.j) {
             let xm = me.bxdInfo.j.xm
             let tel = me.bxdInfo.j.sj
@@ -637,21 +642,30 @@
             if (me.isEncry) { // 扫描二维码打开的情况下，加密电话并且不能拨打
               desc = tel ? `系统已自动派单给维修师傅<span class="name">${xm}</span>(手机：<a class="tel">${encryPhoneNumber(tel)}</a>)，等待处理...`
                 : `系统已自动派单给维修师傅<span class="name">${xm}</span>，等待处理...`;
-              if(me.bxdInfo.state == 2) {
+              if(me.bxdInfo.state == 2 || me.bxdInfo.state == 4) {
                 desc = '当前订单已完成修理，等待验收，如出现问题，可以申请返工。'
+                title = '已维修';
+              }else if(me.bxdInfo.state == 5){
+                desc = '当前订单已完成修理，但验收未通过。';
+                title = '未通过';
               }
+
             }else {
               desc = tel ? `系统已自动派单给维修师傅<span class="name">${xm}</span>(手机：<a class="tel" href="tel:${tel}">${tel}</a>)，等待处理...`
                 : `系统已自动派单给维修师傅<span class="name">${xm}</span>，等待处理...`;
-              if(me.bxdInfo.state == 2) {
+              if(me.bxdInfo.state == 2 || me.bxdInfo.state == 4) {
                 desc = '当前订单已完成修理，等待验收，如出现问题，可以申请返工。'
+                title = '已维修';
+              }else if(me.bxdInfo.state == 5){
+                desc = '当前订单已完成修理，但审核员验收未通过。';
+                title = '未通过';
               }
             }
           } else {
             desc = '等待管理员指派维修师傅，请耐心等待...'
           }
           step.steps.push({
-            title: '维修中',
+            title: title,
             time: me.$moment(me.bxdInfo.sbsj).format(me.format),
             desc: desc
           })
