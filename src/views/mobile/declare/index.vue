@@ -365,10 +365,6 @@
           this.submitBxdParams.bxlb = '';
         } else {
           this.submitBxdParams.bxlb = currentVal[0]+'-'+currentVal[1];
-          console.log(currentVal);
-          console.log(typeof currentVal);
-          console.log(this.submitBxdParams.bxlb);
-
         }
       },
       getActions(type) {
@@ -463,7 +459,7 @@
           });
         } else {
           BxdServlet(this.submitBxdParams).then(() => {
-            this.loading = false
+            this.loading = false;
             this.$toast({
               message: '申报已提交',
               icon: this.icons + 'icon_suc@2x.png',
