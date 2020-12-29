@@ -56,7 +56,11 @@ export function getBxdShState(state) {
  * @param info
  */
 export function responseErrorNotify(info) {
-  info = Number(info)
+  if(info.startsWith("当前没有可以接单的接单人了")) {
+    Notification({ type: 'error', message: '当前没有可以接单的接单人了！请尽快电话联系后勤处为您安排接单人！', duration: 5000 })
+    return;
+  }
+  info =  Number(info)
   switch (info) {
     case 0:
       Notification({ type: 'error', message: '未登录授权或无权限！', duration: 1000 })

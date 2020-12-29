@@ -26,7 +26,7 @@ service.interceptors.response.use(
   response => {
     const res = response.data
     // status === 'success' 表示请求成功， === 'false' 表示请求错误
-    if (res.status === 'false') {
+    if (res.status == 'false') {
       responseErrorNotify(res.info)
       return Promise.reject(new Error(res.message || 'Error'))
     } else {
