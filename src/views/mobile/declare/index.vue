@@ -670,11 +670,13 @@
         this.uploadend = false
         this.tempVideoFile = ''
         this.tempVideo = ''
-        if (this.SubmitForm.sp !== ''){
-          DeleteVideo(this.submitForm.sp)
-        }
+        // if (this.SubmitForm.sp !== ''){
+        //   DeleteVideo(this.submitForm.sp)
+        // }
         this.$nextTick(() => {
           document.getElementById("file").value = "";
+          let all = document.getElementById("video-player");
+          all.removeChild(all.childNodes[1]);
         })
       }
     }
