@@ -766,7 +766,7 @@
        */
       toRework() {
         let param = {
-          'jid': this.authInfo.ybid,
+          'jid': this.bxdInfo.jid,
           'bid': this.bxdInfo.id
         }
         // 存储值：将对象转换为Json字符串
