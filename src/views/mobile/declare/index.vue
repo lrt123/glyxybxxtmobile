@@ -546,7 +546,9 @@
               file: _file
             })
             this.uploadFilesCache = JSON.parse(JSON.stringify(this.uploadFiles))
-            this.submitBxdParams.tp = this.setParamsTp()
+            if (this.submitText !== "重新提交"){
+              this.submitBxdParams.tp = this.setParamsTp()
+            }
           }
         })
       },

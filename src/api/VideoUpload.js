@@ -13,7 +13,7 @@ let config = {
 export function VideoUpload(data) {
   let formData = new FormData()
   formData.append("file", data)
-  return Axios.post('/video-upload', formData, config);
+  return Axios.post('/bx/video-upload', formData, config);
 }
 
 export function DeleteVideo(filename) {
