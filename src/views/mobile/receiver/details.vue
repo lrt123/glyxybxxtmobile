@@ -487,7 +487,7 @@
               }
             }
             //修改耗材按钮状态
-            if(this.bxdInfo.hc == ''||Object.prototype.toString.call(this.bxdInfo.hc)==='[object Null]'){
+            if (this.bxdInfo.gs == ''||Object.prototype.toString.call(this.bxdInfo.hc)==='[object Null]'){
               this.disupdate = true;
             }
             if (this.bxdInfo.shy1state == '2' || this.bxdInfo.shy2state == '2'){
@@ -836,7 +836,7 @@
        * 接口读取耗材列表，显示上拉菜单
        */
       async showHcList() {
-        this.bxdInfo.hc ='';
+        this.bxdInfo.hc = '';
         this.showHcListActionSheet = true
         if (!this.hclist.length) {
           await this.getHc()
