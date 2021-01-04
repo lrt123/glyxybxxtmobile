@@ -379,7 +379,7 @@
       },
       // 显示评分区块
       showScore() {
-        return this.bxdInfo.state == 2 // 申报单状态必须为2已维修的情况下
+        return this.bxdInfo.state == 4 // 申报单状态必须为4已验收的情况下
       },
       // bxdInfo赋值之后再渲染
       showBxdInfo() {
@@ -586,7 +586,7 @@
             step1()
             step4()
           }
-        }
+        }else if (state === 4)
         this.bxdInfo = Object.assign({}, this.bxdInfo, {
           step: step
         })

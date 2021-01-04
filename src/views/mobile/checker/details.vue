@@ -230,7 +230,7 @@
           </template>
         </div>
         <div class="button">
-          <template v-if="eid && bxdshystate">
+          <template v-if=" eid!=null && bxdshystate">
             <van-button class="button-item select" type="primary" size="normal" round
                         @click.prevent="shyPass('确定通过', 1)">通过审核
             </van-button>

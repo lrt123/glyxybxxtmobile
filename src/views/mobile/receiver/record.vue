@@ -9,6 +9,7 @@
       <div class="gs">
         <div class="gs-text">剩余工时：</div>
         <el-progress v-if="gs || gs == 0" :text-inside="false" :stroke-width="12" :percentage="((2 - gs) / 2) * 100" :color="customColors" :format="formatGs"></el-progress>
+        <van-button v-if="presta" class="button-item btn-ckywxdd" type="primary" size="small" round @click.prevent="myHistorydd()">维修历史</van-button>
       </div>
     </div>
     <div class="main-header">
@@ -67,9 +68,30 @@
       </div>
     </div>
     <div class="main-content" ref="main-content">
-      <div v-if="jblist.length">
+      <div v-if="jblist.length && sta ">
         <div
           v-for="(item, index) in handleBlist"
+          :class="['main-content-item', { 'completed': item.state === 2 || item.state === 3 }]"
+          :key="index"
+          @click="onItemClick(item)"
+        >
+          <div class="bid">编号：{{ item.id }}</div>
+          <div class="date">
+            <i class="el-icon-time"></i>
+            <span>{{ $moment(item.sbsj).format(format) }}</span>
+          </div>
+          <div class="category">
+            报修类别：{{ item.bxlb }}
+          </div>
+          <div class="state">
+            {{ getState(item.state).text }}
+          </div>
+          <div class="desc">{{ item.bxnr }}</div>
+        </div>
+      </div>
+      <div v-else-if="jblists.length && !presta ">
+        <div
+          v-for="(item, index) in handleAllBlist"
           :class="['main-content-item', { 'completed': item.state === 2 || item.state === 3 }]"
           :key="index"
           @click="onItemClick(item)"
@@ -110,6 +132,9 @@
     components: { noDataShow },
     data() {
       return {
+        sta: true,
+        presta: true,
+        jblists: [],
         switchAutoMonior: true, // 自动监控
         timer: null, // 定时器
 
@@ -161,7 +186,34 @@
         def.sort(sortBxd)
 
         return sbz.concat(wxz, ywx, def)
+      },
+      handleAllBlist () {
+        // 对报修单按进度排序
+        const sbz = [] // 申报中
+        const wxz = [] // 维修中
+        const ywx = [] // 已维修
+        const def = [] // 其他
+        this.jblists.forEach((item) => {
+          if (item.state == 0) {
+            sbz.push(item)
+          } else if (item.state == 1) {
+            wxz.push(item)
+          } else if (item.state == 2) {
+            ywx.push(item)
+          } else {
+            def.push(item)
+          }
+        })
+
+        // 时间从新到旧排序
+        sbz.sort(sortBxd)
+        wxz.sort(sortBxd)
+        ywx.sort(sortBxd)
+        def.sort(sortBxd)
+
+        return sbz.concat(wxz, ywx, def)
       }
+
     },
     mounted() {
       if (this.authInfo.sf != 2 ) {
@@ -194,6 +246,24 @@
       next()
     },
     methods: {
+      /*查询已维修的订单*/
+      myHistorydd() {
+        this.sta = false;
+        this.presta = false;
+        this.jblists = [];
+        JdrServlet({
+          op: 'selbxdbyjdr',
+          jid: this.authInfo.ybid
+        }).then(res => {
+          for (let i = 0; i < res.obj.blist.length; i++) {
+            // let state = res.obj.blist[i].state;
+            if (res.obj.blist[i].state == 4) {
+              this.jblists.push(res.obj.blist[i])
+            }
+          }
+        })
+      },
+
       /**
        * 剩余工时
        */
