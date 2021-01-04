@@ -230,7 +230,7 @@
           </template>
         </div>
         <div class="button">
-          <template v-if=" eid!=null && bxdshystate">
+          <template v-if=" eid != null && bxdshystate">
             <van-button class="button-item select" type="primary" size="normal" round
                         @click.prevent="shyPass('确定通过', 1)">通过审核
             </van-button>
@@ -475,9 +475,9 @@
             //审核员审核按钮状态
             let stateParam = sessionStorage.getItem('bxdshystate');
             this.bxdshystate = (getAuthInfo().ybid == this.bxdInfo.shy1) ?
-              (this.bxdInfo.shy1state === 0 || this.bxdInfo.shy1state === 2)
+              (this.bxdInfo.shy1state === 0)
               :
-              (this.bxdInfo.shy2state === 0 || this.bxdInfo.shy2state === 2) || stateParam
+              (this.bxdInfo.shy2state === 0) || stateParam
             if (this.bxdInfo.hc){
               //耗材数据处理
               let str = this.bxdInfo.hc;
