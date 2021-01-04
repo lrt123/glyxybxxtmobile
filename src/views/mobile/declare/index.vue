@@ -954,11 +954,11 @@
       }
 
       .his-list {
-        width: 128px;
+        width: 168px;
         height: 44px;
         float: right;
         font-size: 32px;
-        font-family: PingFang SC;
+        font-family: Microsoft YaHei;
         font-weight: 400;
         line-height: 44px;
         cursor: pointer;
