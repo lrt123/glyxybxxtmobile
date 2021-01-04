@@ -954,7 +954,7 @@
       }
 
       .his-list {
-        width: 128px;
+        width: 168px;
         height: 44px;
         float: right;
         font-size: 32px;

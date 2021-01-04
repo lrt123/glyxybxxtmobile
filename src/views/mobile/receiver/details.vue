@@ -836,6 +836,7 @@
        * 接口读取耗材列表，显示上拉菜单
        */
       async showHcList() {
+        this.bxdInfo.hc ='';
         this.showHcListActionSheet = true
         if (!this.hclist.length) {
           await this.getHc()
