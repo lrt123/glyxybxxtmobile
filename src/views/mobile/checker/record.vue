@@ -81,7 +81,9 @@
             报修类别：{{ item.bxlb }}
           </div>
           <div class="state">
-            <span v-if="detailShyState">未通过审核</span>
+            <div v-if="detailShyState">
+              <span>未通过审核</span>
+            </div>
             {{ getState(item.state).text }}
           </div>
           <div class="desc">{{ item.bxnr }}</div>
