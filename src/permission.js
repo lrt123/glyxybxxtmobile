@@ -35,9 +35,6 @@ router.beforeEach(async (to, from, next) => {
     // 首先读取cookie是否有授权信息，如果有 直接进去页面，如果没有 跳到授权登录页面
     let authInfo = getAuthInfo()
     if (authInfo) {
-      if((to.path).search("bxqt/#/declare-details/") !== -1) {
-        next();
-      }
       switch (Number(authInfo.sf)) {
         case 1:
           if (
@@ -74,6 +71,7 @@ router.beforeEach(async (to, from, next) => {
       }
     } else {
       if((to.path).search("bxqt/#/declare-details/") !== -1) {
+        localStorage.setItem("enterByWebEwm","true");
         next();
       }
       window.location.href = store.getters.config.redirect
