@@ -65,7 +65,7 @@
         <div class="category">报修类别：{{ bxdInfo.bxlb }}</div>
         <div class="desc">内容：{{ bxdInfo.bxnr }}</div>
         <div class="img-grid">
-          <van-grid v-if="showType === 'img'" :column-num="3">
+          <van-grid v-show="img" :column-num="3">
             <van-grid-item
               class="img-grid-item"
               v-for="(src, index) in images"
@@ -75,13 +75,30 @@
               <van-image class="image" :src="src" fit="cover"/>
             </van-grid-item>
           </van-grid>
-          <div v-else-if="showType === 'vedio'" class="vedioBox">
-            <video width="320" height="200" controls>
-              <source :src="images" type="video/*">
+          <div v-if="video" class="videoBox">
+            <video width="320" height="200" controls :src="videoUrl" preload="auto">
               您的浏览器不支持Video标签。
             </video>
           </div>
         </div>
+<!--        <div class="img-grid">-->
+<!--          <van-grid v-if="showType === 'img'" :column-num="3">-->
+<!--            <van-grid-item-->
+<!--              class="img-grid-item"-->
+<!--              v-for="(src, index) in images"-->
+<!--              :key="index"-->
+<!--              @click="handleImagePreview(index)"-->
+<!--            >-->
+<!--              <van-image class="image" :src="src" fit="cover"/>-->
+<!--            </van-grid-item>-->
+<!--          </van-grid>-->
+<!--          <div v-else-if="showType === 'vedio'" class="vedioBox">-->
+<!--            <video width="320" height="200" controls>-->
+<!--              <source :src="images" type="video/*">-->
+<!--              您的浏览器不支持Video标签。-->
+<!--            </video>-->
+<!--          </div>-->
+<!--        </div>-->
         <div class="container">
 
           <van-divider dashed></van-divider>
@@ -235,7 +252,7 @@
         </div>
         <div class="button">
           <template v-if="showCompleteButton">
-            <van-button v-if="disupdate" class="button-item select" type="info" size="large" round @click.prevent="hcDialog = true">
+            <van-button v-if="disupdate" class="button-item select" type="info" size="large" round @click.prevent="hcDialogShow">
               {{ bxdInfo.hc ? '修改耗材和工时' : '填写耗材和工时' }}
             </van-button>
             <van-button v-if="completeBtn" class="button-item complete" type="primary" size="large" round @click.prevent="submitHc">完成工单
@@ -515,22 +532,21 @@
         const me = this
         const bxdInfo = this.bxdInfo
         // 提取报修图片
-        if (bxdInfo.tp.length > 0) {
-          let bxdimg = this.$store.getters.config.bxdimg
-          let tp = bxdInfo.tp
-          let firstCode = tp.charAt(0) // 读取第一个字符，是@代表申报人上传的是视频
-          if (firstCode === '@') { // 代表视频
-            this.showType = 'vedio'
-            this.images = `${bxdimg}/${tp}`
-          } else { // 代表图片
-            this.showType = 'img'
-            this.images = []
-            const arr = tp.split('|')
-            arr.shift()
-            this.images = arr.map(item => {
-              return `${bxdimg}/${item}`
-            })
-          }
+        let bxdimg = this.$store.getters.config.bxdimg
+        let tp = bxdInfo.tp?bxdInfo.tp : ''
+        let sp = bxdInfo.sp?bxdInfo.sp : ''
+        if (tp.trim() !== '') {
+          this.img = true
+          this.images = []
+          const arr = tp.split('|')
+          arr.shift()
+          this.images = arr.map(item => {
+            return `${bxdimg}/${item}`
+          })
+        }
+        if (sp.trim() !== '') {
+          this.video = true
+          this.videoUrl = `${bxdimg}/${sp}`
         }
 
         // 提取报修耗材
@@ -744,6 +760,12 @@
           })
         })
       },
+       //点击修改耗材或者添加耗材按钮
+       hcDialogShow(){
+         //清空显示的耗材列表
+         this.hc = [];
+         this.hcDialog = true
+       },
       /**
        * 取消耗材填写
        */
@@ -836,7 +858,6 @@
        * 接口读取耗材列表，显示上拉菜单
        */
       async showHcList() {
-        this.bxdInfo.hc = '';
         this.showHcListActionSheet = true
         if (!this.hclist.length) {
           await this.getHc()
