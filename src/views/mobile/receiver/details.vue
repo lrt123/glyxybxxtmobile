@@ -3,7 +3,7 @@
     <div class="main-header" ref="main-header">
       <div class="title" ref="title">申报单</div>
       <div class="back" ref="back" @click="$router.go(-1)">返回</div>
-      <div v-if="eid && showCancleBtn" class="cancle" @click="revokeBxd">撤回</div>
+<!--      <div v-if="eid && showCancleBtn" class="cancle" @click="revokeBxd">撤回</div>-->
     </div>
     <div class="main-progress">
       <!--显示分数-->
