@@ -81,10 +81,7 @@
             报修类别：{{ item.bxlb }}
           </div>
           <div class="state">
-            <div v-if="detailShyState">
-              <span>未通过审核</span>
-            </div>
-            {{ getState(item.state).text }}
+            {{ getState(item.state, item.shy1, item.shy1state, item.shy2state).text }}
           </div>
           <div class="desc">{{ item.bxnr }}</div>
         </div>
@@ -112,7 +109,6 @@
     components: { noDataShow },
     data() {
       return {
-        detailShyState: sessionStorage.getItem('detailShyState'),
         switchAutoMonior: true, // 自动监控
         timer: null, // 定时器
 
@@ -187,31 +183,18 @@
        * 转换身份，进行申报
        * */
       toMyDeclare(){
-        let query = this.$route.query
-
-        // 学号或工号、身份、易班id三个参数必须存在才能通过授权
-        if (query.xh && query.sf && query.ybid) {
-          // 默认姓名和头像
-          // unescape 解析
-          query.xm =  unescape(query.xm.replace(/\\u/g, "%u")) || '路人甲'
-          query.head =  query.head || this.headimg
-          // 信息保存cookie
-          query.sf = 1;
-          //改变当前身份状态，存入cookie
-          setAuthInfo(query)
-
-          if (query.eid) {
-            // 跳转至正在申报列中的列表页面
-            let recordPath = config.declareEidRecordPath.replace(':id', '')
-            this.$router.push(recordPath + query.eid)
-          } else {
-            // 跳转申报记录页面
-            let recordPath = config.declareRecordPath.replace(':id', '')
-            this.$router.push(recordPath + query.xh)
-          }
-        } else {
-          auth()
-        }
+        this.authInfo.sf = 1;
+        //改变当前身份状态，存入cookie
+        setAuthInfo(this.authInfo)
+        if (this.authInfo.eid) {
+              // 跳转至正在申报列中的列表页面
+              let recordPath = config.declareEidRecordPath.replace(':id', '')
+              this.$router.push(recordPath + this.authInfo.eid)
+            } else {
+              // 跳转申报记录页面
+              let recordPath = config.declareRecordPath.replace(':id', '')
+              this.$router.push(recordPath + this.authInfo.xh)
+            }
       },
       /**
        * 自动监控，每隔n秒刷新一次数据
@@ -253,9 +236,17 @@
        * @param state
        * @returns {*}
        */
-      getState(state) {
-        const item = config.progress && config.progress.filter(item => item.value === state)
-        return item && item[0]
+      getState(state, shy1, shy1state, shy2state){
+        if (state == 1) {
+        const item = (getAuthInfo().ybid == shy1) ?
+            config.shState && config.shState.filter(item => item.value === shy1state)
+            :
+            config.shState && config.shState.filter(item => item.value === shy2state)
+          return item && item[0]
+        } else {
+          const item = config.progress && config.progress.filter(item => item.value === state);
+          return item && item[0];
+        }
       },
       /**
        * 进入工单详情页

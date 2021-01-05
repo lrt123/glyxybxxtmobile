@@ -75,12 +75,30 @@
               <van-image class="image" :src="src" fit="cover"/>
             </van-grid-item>
           </van-grid>
-          <div v-show="video" class="videoBox">
+          <div v-if="video" class="videoBox">
             <video width="320" height="200" controls :src="videoUrl" preload="auto">
               您的浏览器不支持Video标签。
             </video>
           </div>
         </div>
+<!--        <div class="img-grid">-->
+<!--          <van-grid v-if="showType === 'img'" :column-num="3">-->
+<!--            <van-grid-item-->
+<!--              class="img-grid-item"-->
+<!--              v-for="(src, index) in images"-->
+<!--              :key="index"-->
+<!--              @click="handleImagePreview(index)"-->
+<!--            >-->
+<!--              <van-image class="image" :src="src" fit="cover"/>-->
+<!--            </van-grid-item>-->
+<!--          </van-grid>-->
+<!--          <div v-else-if="showType === 'vedio'" class="vedioBox">-->
+<!--            <video width="320" height="200" controls>-->
+<!--              <source :src="images" type="video/*">-->
+<!--              您的浏览器不支持Video标签。-->
+<!--            </video>-->
+<!--          </div>-->
+<!--        </div>-->
         <div class="container">
 
           <van-divider dashed></van-divider>
@@ -234,7 +252,7 @@
         </div>
         <div class="button">
           <template v-if="showCompleteButton">
-            <van-button v-if="disupdate" class="button-item select" type="info" size="large" round @click.prevent="hcDialog = true">
+            <van-button v-if="disupdate" class="button-item select" type="info" size="large" round @click.prevent="hcDialogShow">
               {{ bxdInfo.hc ? '修改耗材和工时' : '填写耗材和工时' }}
             </van-button>
             <van-button v-if="completeBtn" class="button-item complete" type="primary" size="large" round @click.prevent="submitHc">完成工单
@@ -284,13 +302,13 @@
               class="hc"
             >
               <div class="hc-name">
-             {{item.mc}}
+                {{item.mc}}
               </div>
               <van-stepper class="hc-sl" v-model="item.sl" :min="0" input-width="50px" button-size="26px" />
               <div class="hc-dw">{{item.dw}}</div>
               <van-icon class="hc-del" :name="icons + 'icon_delete_s@2x.png'" @click="removeHc(item.id)" />
             </div>
-              <van-button  class="button-add" type="primary" size="large" plain round @click.prevent="showHcList">点击添加耗材</van-button>
+            <van-button  class="button-add" type="primary" size="large" plain round @click.prevent="showHcList">点击添加耗材</van-button>
           </div>
         </div>
         <div class="title">工时：</div>
@@ -418,34 +436,34 @@
        */
       async getHc() {
         await HcServlet({
-            op: 'selhc'
-          }).then(res => {
-            if (res.obj && res.obj.hlist) {
-              this.hclist = res.obj.hlist.map(item => {
-                if(item.xh !== null){
-                  return {
-                    id: item.id,
-                    mc: item.mc,
-                    name: item.mc + '(' + item.xh +')'+ '(' + item.dw +')',
-                    dw: item.dw,
-                    xh:item.xh
-                  }
-                }else{
-                  return {
-                    id: item.id,
-                    mc: item.mc,
-                    name: item.mc + '(' + item.dw +')',
-                    dw: item.dw,
-                    xh:item.xh
-                  }
+          op: 'selhc'
+        }).then(res => {
+          if (res.obj && res.obj.hlist) {
+            this.hclist = res.obj.hlist.map(item => {
+              if(item.xh !== null){
+                return {
+                  id: item.id,
+                  mc: item.mc,
+                  name: item.mc + '(' + item.xh +')'+ '(' + item.dw +')',
+                  dw: item.dw,
+                  xh:item.xh
                 }
+              }else{
+                return {
+                  id: item.id,
+                  mc: item.mc,
+                  name: item.mc + '(' + item.dw +')',
+                  dw: item.dw,
+                  xh:item.xh
+                }
+              }
 
-              })
+            })
 
-            } else {
-              this.$notify({ type: 'warning', message: '数据异常', duration: 1000 })
-            }          
-          }).catch(err => {
+          } else {
+            this.$notify({ type: 'warning', message: '数据异常', duration: 1000 })
+          }
+        }).catch(err => {
           this.$notify({ type: 'error', message: '接口异常或网络中断', duration: 1000 })
         })
       },
@@ -519,7 +537,7 @@
         let bxdimg = this.$store.getters.config.bxdimg
         let tp = bxdInfo.tp?bxdInfo.tp : ''
         let sp = bxdInfo.sp?bxdInfo.sp : ''
-        if (tp.trim() !== ''){
+        if (tp.trim() !== '') {
           this.img = true
           this.images = []
           const arr = tp.split('|')
@@ -528,7 +546,7 @@
             return `${bxdimg}/${item}`
           })
         }
-        if (sp.trim() !== ''){
+        if (sp.trim() !== '') {
           this.video = true
           this.videoUrl = `${bxdimg}/${sp}`
         }
@@ -587,9 +605,9 @@
             step4()
           }
         }else if (state === 4)
-        this.bxdInfo = Object.assign({}, this.bxdInfo, {
-          step: step
-        })
+          this.bxdInfo = Object.assign({}, this.bxdInfo, {
+            step: step
+          })
 
         function step1() {
           const sbsj = me.$moment(me.bxdInfo.sbsj).format(me.format)
@@ -744,6 +762,12 @@
           })
         })
       },
+       //点击修改耗材或者添加耗材按钮
+       hcDialogShow(){
+         //清空显示的耗材列表
+         this.hc = [];
+         this.hcDialog = true
+       },
       /**
        * 取消耗材填写
        */
@@ -836,7 +860,6 @@
        * 接口读取耗材列表，显示上拉菜单
        */
       async showHcList() {
-        this.bxdInfo.hc = '';
         this.showHcListActionSheet = true
         if (!this.hclist.length) {
           await this.getHc()
@@ -1276,9 +1299,9 @@
             }
 
             .unit {
-                font-size: 28px;
-                margin-left: 5px;
-              }
+              font-size: 28px;
+              margin-left: 5px;
+            }
 
             .tel {
               position: absolute;
@@ -1353,7 +1376,7 @@
           background: rgba(244, 246, 248, 1);
           border-radius: 32px;
         }
-        
+
         .select-hc {
           max-height: 36vh;
           overflow: auto;
