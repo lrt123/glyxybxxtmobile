@@ -81,6 +81,7 @@
             报修类别：{{ item.bxlb }}
           </div>
           <div class="state">
+            <span v-if="detailShyState">未通过审核</span>
             {{ getState(item.state).text }}
           </div>
           <div class="desc">{{ item.bxnr }}</div>
@@ -109,6 +110,7 @@
     components: { noDataShow },
     data() {
       return {
+        detailShyState: sessionStorage.getItem('detailShyState'),
         switchAutoMonior: true, // 自动监控
         timer: null, // 定时器
 

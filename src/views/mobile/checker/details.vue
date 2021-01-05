@@ -230,7 +230,7 @@
           </template>
         </div>
         <div class="button">
-          <template v-if=" eid != null && bxdshystate">
+          <template v-if="eid != null & bxdshystate & hcAndGsState">
             <van-button class="button-item select" type="primary" size="normal" round
                         @click.prevent="shyPass('确定通过', 1)">通过审核
             </van-button>
@@ -347,6 +347,8 @@
     components: {noDataShow},
     data() {
       return {
+        hcAndGsState: true, // 耗材 有耗材时显示审核按钮
+        bxdshystate2: true, // 审核员 未通过审核时订单信息提示显示
         bxdshystate: true,//审核员 审核按钮状态
         fghc:[],//返工耗材
         showType: 'img', // img或vedio申报人上传的是图片还是视频
@@ -478,6 +480,13 @@
               (this.bxdInfo.shy1state === 0)
               :
               (this.bxdInfo.shy2state === 0) || stateParam
+            this.hcAndGsState = this.bxdInfo.hc.length == 0 && this.bxdInfo.gs == '' ? false : true;
+            // 未通过审核时订单信息显示 -> true: 显示未通过审核, false: 不显示
+            let detailShyState = this.bxdshystate2 = (getAuthInfo().ybid == this.bxdInfo.shy1) ?
+              (this.bxdInfo.shy1state === 2)
+              :
+              (this.bxdInfo.shy2state === 2) || stateParam
+            sessionStorage.setItem('detailShyState', detailShyState);
             if (this.bxdInfo.hc){
               //耗材数据处理
               let str = this.bxdInfo.hc;
