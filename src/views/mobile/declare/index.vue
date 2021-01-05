@@ -37,7 +37,7 @@
       <el-form class="form" ref="ruleForm" :model="submitBxdParams" :rules="rules" label-width="80px"
                label-position="top"
                :show-message="true">
-        <el-form-item label="报修类别" prop="bxlb">
+        <el-form-item v-if="bxlbSelect" label="报修类别" prop="bxlb">
 <!--          <el-input v-model="submitBxdParams.bxlb" readonly suffix-icon="el-icon-caret-bottom" placeholder="选择报修类别"-->
 <!--                    @focus="handleInputFocus('bxlb')">-->
 <!--          </el-input>-->
@@ -193,6 +193,7 @@
     name: 'Declare',
     data() {
       return {
+        bxlbSelect:true,
         options:[],
         submitType: 'img', // 上传类型，img或video
         action_video: '', // 上传视频时action的地址
@@ -289,6 +290,10 @@
       this.detailPath = this.detailPath.replace(':id', '')
       this.inityydate()
       this.initDict()
+      let rework = sessionStorage.getItem('rework');
+      if (rework === 'toRework'){
+        this.bxlbSelect = false;
+      }
     },
     computed: {
       ...mapGetters(['blist', 'config']),

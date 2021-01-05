@@ -726,29 +726,41 @@
           message: text,
           showCancelButton: true
         }).then(() => {
-          ShyServlet({
-            op: 'upbxdbyysr', // 调用方法，固定值*
-            shyid: this.authInfo.ybid, // 易班id*
-            bid: this.bxdInfo.id, // 报修单id*
-            state: state // 审核情况*，4通过，5不通过
-          }).then(res => {
-            this.ysr = false
-            if (res.status === 'success') {
-              this.$toast({
-                message: '提交成功',
-                icon: this.icons + 'icon_suc@2x.png',
-                duration: 1500,
-                onClose: () => {
-                  this.getBxdDetails()
-                }
-              })
-            } else {
-              this.$toast({
-                message: '提交失败',
-                icon: this.icons + 'tip_info@2x.png',
-                duration: 1500
-              })
-            }
+          let param = {
+            'jid': this.bxdInfo.jid,
+            'bid': this.bxdInfo.id
+          }
+          // 存储值：将对象转换为Json字符串
+          sessionStorage.setItem('param', JSON.stringify(param));
+          //申请返工，报修类别不能填写
+          sessionStorage.setItem('rework','toRework');
+          let bxdshystate = true
+          sessionStorage.setItem("bxdshystate",bxdshystate)
+          this.$router.push(config.declarePath)
+          // ShyServlet({
+          //   op: 'upbxdbyysr', // 调用方法，固定值*
+          //   shyid: this.authInfo.ybid, // 易班id*
+          //   bid: this.bxdInfo.id, // 报修单id*
+          //   state: state // 审核情况*，4通过，5不通过
+          // }).then(res => {
+          //   this.ysr = false
+          //   if (res.status === 'success') {
+          //     this.$toast({
+          //       message: '提交成功',
+          //       icon: this.icons + 'icon_suc@2x.png',
+          //       duration: 1500,
+          //       onClose: () => {
+          //         this.getBxdDetails()
+          //       }
+          //     })
+          //   } else {
+          //     this.$toast({
+          //       message: '提交失败',
+          //       icon: this.icons + 'tip_info@2x.png',
+          //       duration: 1500
+          //     })
+          //   }
+
           }).catch(() => {
             this.$toast({
               message: '提交失败',
