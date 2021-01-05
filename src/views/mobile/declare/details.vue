@@ -243,7 +243,8 @@
             <van-button class="button-item warning" type="warning" size="large" round @click.prevent="evaluateAddDialog = true">追加评价</van-button>
           </template>
         </div>
-        <div class="button">
+        <div v-if="!enterByWebEwm"
+             class="button">
           <template v-if="eid && bxdInfo.fgts>0 && bxdInfo.state == 2 || bxdInfo.state == 4">
             <el-collapse>
               <el-collapse-item title="返工说明">
@@ -268,6 +269,7 @@
 
     <!--评价评分-->
     <van-dialog
+      v-if="!enterByWebEwm"
       v-model="evaluateDialog"
       :show-confirm-button="false"
     >
@@ -301,6 +303,7 @@
 
     <!--追加评价-->
     <van-dialog
+      v-if="!enterByWebEwm"
       v-model="evaluateAddDialog"
       :show-confirm-button="false"
     >
@@ -325,6 +328,7 @@
 
     <!--弹框提示 撤回报修单-->
     <van-dialog
+      v-if="!enterByWebEwm"
       v-model="cancleDialog"
       :show-confirm-button="false"
     >
@@ -378,6 +382,7 @@
     components: {noDataShow},
     data() {
       return {
+        enterByWebEwm: false,
         fghc:[],//返工耗材
         showType: 'img', // img或video申报人上传的是图片还是视频
         img: false,
@@ -444,6 +449,9 @@
       }
       await this.getHc()
       this.getBxdDetails()
+      if(localStorage.getItem("enterByWebEwm") == "true"){
+        this.enterByWebEwm = true;
+      }
     },
     methods: {
       /**
