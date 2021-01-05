@@ -359,6 +359,8 @@
       return {
         fghc:[],//返工耗材
         completeBtn:false,
+        video: false,
+        videoUrl: '',
         disupdate:false,//设置修改耗材按钮
         showType: 'img', // img或vedio申报人上传的是图片还是视频
         popupShow: false, // 顶部弹出popup

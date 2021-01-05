@@ -349,7 +349,7 @@
     data() {
       return {
         hcAndGsState: true, // 耗材 有耗材时显示审核按钮
-        bxdshystate2: true, // 审核员 未通过审核时订单信息提示显示
+        bxdshystate2: false, // 审核员 未通过审核时订单信息提示显示
         bxdshystate: true,//审核员 审核按钮状态
         fghc:[],//返工耗材
         showType: 'img', // img或vedio申报人上传的是图片还是视频
