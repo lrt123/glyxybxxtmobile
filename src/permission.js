@@ -35,13 +35,15 @@ router.beforeEach(async (to, from, next) => {
     // 首先读取cookie是否有授权信息，如果有 直接进去页面，如果没有 跳到授权登录页面
     let authInfo = getAuthInfo()
     if (authInfo) {
+      if((to.path).search("bxqt/#/declare-details/") !== -1) {
+        next();
+      }
       switch (Number(authInfo.sf)) {
         case 1:
           if (
             to.path.indexOf(config.declarePath) !== -1 ||
             to.path.indexOf(config.declareRecordPath.replace(':id', '')) !== -1 ||
-            to.path.indexOf(config.declareDetailsPath.replace(':id', '')) !== -1 ||
-            to.path.search("bxqt/#/declare-details/") !== -1
+            to.path.indexOf(config.declareDetailsPath.replace(':id', '')) !== -1
           ) {
             next()
           } else {
