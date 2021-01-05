@@ -26,9 +26,12 @@ router.beforeEach(async (to, from, next) => {
   // 设置网页标题
   document.title = getPageTitle(to.meta.title)
 
+
+
   if (to.path === '/index' || to.path === '/no-permission' || to.path === '/oauth-failed' || to.path === '/404') { // 授权重定向页面
     next()
   } else { // 其他正常进入的页面
+
     // 首先读取cookie是否有授权信息，如果有 直接进去页面，如果没有 跳到授权登录页面
     let authInfo = getAuthInfo()
     if (authInfo) {
@@ -67,6 +70,10 @@ router.beforeEach(async (to, from, next) => {
           break;
       }
     } else {
+      if((to.path).search("bxqt/#/declare-details/") !== -1) {
+        localStorage.setItem("enterByWebEwm","true");
+        next();
+      }
       window.location.href = store.getters.config.redirect
       // next('/index')
     }

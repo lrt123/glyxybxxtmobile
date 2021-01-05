@@ -37,7 +37,7 @@
       <el-form class="form" ref="ruleForm" :model="submitBxdParams" :rules="rules" label-width="80px"
                label-position="top"
                :show-message="true">
-        <el-form-item  v-if="bxlbSelect" label="报修类别" prop="bxlb">
+        <el-form-item v-if="bxlbSelect" label="报修类别" prop="bxlb">
 <!--          <el-input v-model="submitBxdParams.bxlb" readonly suffix-icon="el-icon-caret-bottom" placeholder="选择报修类别"-->
 <!--                    @focus="handleInputFocus('bxlb')">-->
 <!--          </el-input>-->
@@ -290,7 +290,7 @@
       this.detailPath = this.detailPath.replace(':id', '')
       this.inityydate()
       this.initDict()
-     let rework = sessionStorage.getItem('rework');
+      let rework = sessionStorage.getItem('rework');
       if (rework === 'toRework'){
         this.bxlbSelect = false;
       }

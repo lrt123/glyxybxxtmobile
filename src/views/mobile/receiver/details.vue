@@ -3,7 +3,7 @@
     <div class="main-header" ref="main-header">
       <div class="title" ref="title">申报单</div>
       <div class="back" ref="back" @click="$router.go(-1)">返回</div>
-<!--      <div v-if="eid && showCancleBtn" class="cancle" @click="revokeBxd">撤回</div>-->
+      <!--<div v-if="eid && showCancleBtn" class="cancle" @click="revokeBxd">撤回</div>-->
     </div>
     <div class="main-progress">
       <!--显示分数-->
@@ -285,13 +285,13 @@
               class="hc"
             >
               <div class="hc-name">
-             {{item.mc}}
+                {{item.mc}}
               </div>
               <van-stepper class="hc-sl" v-model="item.sl" :min="0" input-width="50px" button-size="26px" />
               <div class="hc-dw">{{item.dw}}</div>
               <van-icon class="hc-del" :name="icons + 'icon_delete_s@2x.png'" @click="removeHc(item.id)" />
             </div>
-              <van-button  class="button-add" type="primary" size="large" plain round @click.prevent="showHcList">点击添加耗材</van-button>
+            <van-button  class="button-add" type="primary" size="large" plain round @click.prevent="showHcList">点击添加耗材</van-button>
           </div>
         </div>
         <div class="title">工时：</div>
@@ -417,34 +417,34 @@
        */
       async getHc() {
         await HcServlet({
-            op: 'selhc'
-          }).then(res => {
-            if (res.obj && res.obj.hlist) {
-              this.hclist = res.obj.hlist.map(item => {
-                if(item.xh !== null){
-                  return {
-                    id: item.id,
-                    mc: item.mc,
-                    name: item.mc + '(' + item.xh +')'+ '(' + item.dw +')',
-                    dw: item.dw,
-                    xh:item.xh
-                  }
-                }else{
-                  return {
-                    id: item.id,
-                    mc: item.mc,
-                    name: item.mc + '(' + item.dw +')',
-                    dw: item.dw,
-                    xh:item.xh
-                  }
+          op: 'selhc'
+        }).then(res => {
+          if (res.obj && res.obj.hlist) {
+            this.hclist = res.obj.hlist.map(item => {
+              if(item.xh !== null){
+                return {
+                  id: item.id,
+                  mc: item.mc,
+                  name: item.mc + '(' + item.xh +')'+ '(' + item.dw +')',
+                  dw: item.dw,
+                  xh:item.xh
                 }
+              }else{
+                return {
+                  id: item.id,
+                  mc: item.mc,
+                  name: item.mc + '(' + item.dw +')',
+                  dw: item.dw,
+                  xh:item.xh
+                }
+              }
 
-              })
+            })
 
-            } else {
-              this.$notify({ type: 'warning', message: '数据异常', duration: 1000 })
-            }          
-          }).catch(err => {
+          } else {
+            this.$notify({ type: 'warning', message: '数据异常', duration: 1000 })
+          }
+        }).catch(err => {
           this.$notify({ type: 'error', message: '接口异常或网络中断', duration: 1000 })
         })
       },
@@ -587,9 +587,9 @@
             step4()
           }
         }else if (state === 4)
-        this.bxdInfo = Object.assign({}, this.bxdInfo, {
-          step: step
-        })
+          this.bxdInfo = Object.assign({}, this.bxdInfo, {
+            step: step
+          })
 
         function step1() {
           const sbsj = me.$moment(me.bxdInfo.sbsj).format(me.format)
@@ -1276,9 +1276,9 @@
             }
 
             .unit {
-                font-size: 28px;
-                margin-left: 5px;
-              }
+              font-size: 28px;
+              margin-left: 5px;
+            }
 
             .tel {
               position: absolute;
@@ -1353,7 +1353,7 @@
           background: rgba(244, 246, 248, 1);
           border-radius: 32px;
         }
-        
+
         .select-hc {
           max-height: 36vh;
           overflow: auto;
