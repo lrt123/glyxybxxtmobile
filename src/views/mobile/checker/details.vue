@@ -768,8 +768,6 @@
               duration: 1500
             })
           })
-        }).catch(() => {
-        })
       },
       //返工耗材
       formatFghc(hc) {
