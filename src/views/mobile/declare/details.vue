@@ -771,6 +771,8 @@
         }
         // 存储值：将对象转换为Json字符串
         sessionStorage.setItem('param', JSON.stringify(param));
+        //申请返工，报修类别不能填写
+        sessionStorage.setItem('rework','toRework');
         let bxdshystate = true
         sessionStorage.setItem("bxdshystate",bxdshystate)
         this.$router.push(config.declarePath)
