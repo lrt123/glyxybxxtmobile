@@ -26,6 +26,10 @@ router.beforeEach(async (to, from, next) => {
   // 设置网页标题
   document.title = getPageTitle(to.meta.title)
 
+  if((to.path).search("bxqt/#/declare-details/") !== -1) {
+    next(to.path);
+  }
+
   if (to.path === '/index' || to.path === '/no-permission' || to.path === '/oauth-failed' || to.path === '/404') { // 授权重定向页面
     next()
   } else { // 其他正常进入的页面
