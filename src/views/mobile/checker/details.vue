@@ -341,6 +341,7 @@
   import noDataShow from '@/mobile/noDataShow'
   import {getBxdShState, copyObj} from "../../../utils/common";
   import {getAuthInfo} from "../../../utils/cookie";
+  import { setAuthInfo } from '@/utils/cookie'
 
   export default {
     name: 'ReceiverDetails',
@@ -348,7 +349,7 @@
     data() {
       return {
         hcAndGsState: true, // 耗材 有耗材时显示审核按钮
-        bxdshystate2: true, // 审核员 未通过审核时订单信息提示显示
+        bxdshystate2: false, // 审核员 未通过审核时订单信息提示显示
         bxdshystate: true,//审核员 审核按钮状态
         fghc:[],//返工耗材
         showType: 'img', // img或vedio申报人上传的是图片还是视频
@@ -481,12 +482,6 @@
               :
               (this.bxdInfo.shy2state === 0) || stateParam
             this.hcAndGsState = this.bxdInfo.hc.length == 0 && this.bxdInfo.gs == '' ? false : true;
-            // 未通过审核时订单信息显示 -> true: 显示未通过审核, false: 不显示
-            let detailShyState = this.bxdshystate2 = (getAuthInfo().ybid == this.bxdInfo.shy1) ?
-              (this.bxdInfo.shy1state === 2)
-              :
-              (this.bxdInfo.shy2state === 2) || stateParam
-            sessionStorage.setItem('detailShyState', detailShyState);
             if (this.bxdInfo.hc){
               //耗材数据处理
               let str = this.bxdInfo.hc;
@@ -699,6 +694,11 @@
             shystate: state // 审核情况*，1通过，2不通过
           }).then(res => {
             if (res.status === 'success') {
+              //如果审核不通过，则清空显示耗材列表
+              if (state == 2){
+                this.hc = [];
+              }
+
               this.$toast({
                 message: '提交成功',
                 icon: this.icons + 'icon_suc@2x.png',
@@ -726,51 +726,58 @@
       },
 
       /**
-       * 审核通过
+       * 验收通过
        * @param text
-       * @param state 1通过 2不通过
+       * @param state 4通过 5不通过
        */
       ysrPass(text, state) {
         this.$dialog.alert({
           message: text,
           showCancelButton: true
         }).then(() => {
-          let param = {
-            'jid': this.bxdInfo.jid,
-            'bid': this.bxdInfo.id
+          if(state == 5){
+            let param = {
+              'jid': this.bxdInfo.jid,
+              'bid': this.bxdInfo.id
+            }
+            // 存储值：将对象转换为Json字符串
+            sessionStorage.setItem('param', JSON.stringify(param));
+            //申请返工，报修类别不能填写
+            sessionStorage.setItem('rework','toRework');
+            let bxdshystate = true
+            sessionStorage.setItem("bxdshystate",bxdshystate)
+            this.authInfo.sf = 1;
+            this.authInfo.eid = this.bxdInfo.eid;
+            //改变当前身份状态，存入cookie
+            setAuthInfo(this.authInfo)
+            this.$router.push(config.declarePath)
+          }else{
+            ShyServlet({
+              op: 'upbxdbyysr', // 调用方法，固定值*
+              shyid: this.authInfo.ybid, // 易班id*
+              bid: this.bxdInfo.id, // 报修单id*
+              state: state // 审核情况*，4通过，5不通过
+            }).then(res => {
+              this.ysr = false
+              if (res.status === 'success') {
+                this.$toast({
+                  message: '提交成功',
+                  icon: this.icons + 'icon_suc@2x.png',
+                  duration: 1500,
+                  onClose: () => {
+                    this.getBxdDetails()
+                  }
+                })
+              } else {
+                this.$toast({
+                  message: '提交失败',
+                  icon: this.icons + 'tip_info@2x.png',
+                  duration: 1500
+                })
+              }
+            })
           }
-          // 存储值：将对象转换为Json字符串
-          sessionStorage.setItem('param', JSON.stringify(param));
-          //申请返工，报修类别不能填写
-          sessionStorage.setItem('rework','toRework');
-          let bxdshystate = true
-          sessionStorage.setItem("bxdshystate",bxdshystate)
-          this.$router.push(config.declarePath)
-          // ShyServlet({
-          //   op: 'upbxdbyysr', // 调用方法，固定值*
-          //   shyid: this.authInfo.ybid, // 易班id*
-          //   bid: this.bxdInfo.id, // 报修单id*
-          //   state: state // 审核情况*，4通过，5不通过
-          // }).then(res => {
-          //   this.ysr = false
-          //   if (res.status === 'success') {
-          //     this.$toast({
-          //       message: '提交成功',
-          //       icon: this.icons + 'icon_suc@2x.png',
-          //       duration: 1500,
-          //       onClose: () => {
-          //         this.getBxdDetails()
-          //       }
-          //     })
-          //   } else {
-          //     this.$toast({
-          //       message: '提交失败',
-          //       icon: this.icons + 'tip_info@2x.png',
-          //       duration: 1500
-          //     })
-          //   }
-
-          }).catch(() => {
+            }).catch(() => {
             this.$toast({
               message: '提交失败',
               icon: this.icons + 'tip_info@2x.png',

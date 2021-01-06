@@ -65,7 +65,7 @@
         <div class="category">报修类别：{{ bxdInfo.bxlb }}</div>
         <div class="desc">内容：{{ bxdInfo.bxnr }}</div>
         <div class="img-grid">
-          <van-grid v-if="showType === 'img'" :column-num="3">
+          <van-grid v-show="img" :column-num="3">
             <van-grid-item
               class="img-grid-item"
               v-for="(src, index) in images"
@@ -75,13 +75,30 @@
               <van-image class="image" :src="src" fit="cover"/>
             </van-grid-item>
           </van-grid>
-          <div v-else-if="showType === 'vedio'" class="vedioBox">
-            <video width="320" height="200" controls>
-              <source :src="images" type="video/*">
+          <div v-if="video" class="videoBox">
+            <video width="320" height="200" controls :src="videoUrl" preload="auto">
               您的浏览器不支持Video标签。
             </video>
           </div>
         </div>
+<!--        <div class="img-grid">-->
+<!--          <van-grid v-if="showType === 'img'" :column-num="3">-->
+<!--            <van-grid-item-->
+<!--              class="img-grid-item"-->
+<!--              v-for="(src, index) in images"-->
+<!--              :key="index"-->
+<!--              @click="handleImagePreview(index)"-->
+<!--            >-->
+<!--              <van-image class="image" :src="src" fit="cover"/>-->
+<!--            </van-grid-item>-->
+<!--          </van-grid>-->
+<!--          <div v-else-if="showType === 'vedio'" class="vedioBox">-->
+<!--            <video width="320" height="200" controls>-->
+<!--              <source :src="images" type="video/*">-->
+<!--              您的浏览器不支持Video标签。-->
+<!--            </video>-->
+<!--          </div>-->
+<!--        </div>-->
         <div class="container">
 
           <van-divider dashed></van-divider>
@@ -235,7 +252,7 @@
         </div>
         <div class="button">
           <template v-if="showCompleteButton">
-            <van-button v-if="disupdate" class="button-item select" type="info" size="large" round @click.prevent="hcDialog = true">
+            <van-button v-if="disupdate" class="button-item select" type="info" size="large" round @click.prevent="hcDialogShow">
               {{ bxdInfo.hc ? '修改耗材和工时' : '填写耗材和工时' }}
             </van-button>
             <van-button v-if="completeBtn" class="button-item complete" type="primary" size="large" round @click.prevent="submitHc">完成工单
@@ -285,13 +302,13 @@
               class="hc"
             >
               <div class="hc-name">
-             {{item.mc}}
+                {{item.mc}}
               </div>
               <van-stepper class="hc-sl" v-model="item.sl" :min="0" input-width="50px" button-size="26px" />
               <div class="hc-dw">{{item.dw}}</div>
               <van-icon class="hc-del" :name="icons + 'icon_delete_s@2x.png'" @click="removeHc(item.id)" />
             </div>
-              <van-button  class="button-add" type="primary" size="large" plain round @click.prevent="showHcList">点击添加耗材</van-button>
+            <van-button  class="button-add" type="primary" size="large" plain round @click.prevent="showHcList">点击添加耗材</van-button>
           </div>
         </div>
         <div class="title">工时：</div>
@@ -342,6 +359,8 @@
       return {
         fghc:[],//返工耗材
         completeBtn:false,
+        video: false,
+        videoUrl: '',
         disupdate:false,//设置修改耗材按钮
         showType: 'img', // img或vedio申报人上传的是图片还是视频
         popupShow: false, // 顶部弹出popup
@@ -417,34 +436,34 @@
        */
       async getHc() {
         await HcServlet({
-            op: 'selhc'
-          }).then(res => {
-            if (res.obj && res.obj.hlist) {
-              this.hclist = res.obj.hlist.map(item => {
-                if(item.xh !== null){
-                  return {
-                    id: item.id,
-                    mc: item.mc,
-                    name: item.mc + '(' + item.xh +')'+ '(' + item.dw +')',
-                    dw: item.dw,
-                    xh:item.xh
-                  }
-                }else{
-                  return {
-                    id: item.id,
-                    mc: item.mc,
-                    name: item.mc + '(' + item.dw +')',
-                    dw: item.dw,
-                    xh:item.xh
-                  }
+          op: 'selhc'
+        }).then(res => {
+          if (res.obj && res.obj.hlist) {
+            this.hclist = res.obj.hlist.map(item => {
+              if(item.xh !== null){
+                return {
+                  id: item.id,
+                  mc: item.mc,
+                  name: item.mc + '(' + item.xh +')'+ '(' + item.dw +')',
+                  dw: item.dw,
+                  xh:item.xh
                 }
+              }else{
+                return {
+                  id: item.id,
+                  mc: item.mc,
+                  name: item.mc + '(' + item.dw +')',
+                  dw: item.dw,
+                  xh:item.xh
+                }
+              }
 
-              })
+            })
 
-            } else {
-              this.$notify({ type: 'warning', message: '数据异常', duration: 1000 })
-            }          
-          }).catch(err => {
+          } else {
+            this.$notify({ type: 'warning', message: '数据异常', duration: 1000 })
+          }
+        }).catch(err => {
           this.$notify({ type: 'error', message: '接口异常或网络中断', duration: 1000 })
         })
       },
@@ -515,22 +534,21 @@
         const me = this
         const bxdInfo = this.bxdInfo
         // 提取报修图片
-        if (bxdInfo.tp.length > 0) {
-          let bxdimg = this.$store.getters.config.bxdimg
-          let tp = bxdInfo.tp
-          let firstCode = tp.charAt(0) // 读取第一个字符，是@代表申报人上传的是视频
-          if (firstCode === '@') { // 代表视频
-            this.showType = 'vedio'
-            this.images = `${bxdimg}/${tp}`
-          } else { // 代表图片
-            this.showType = 'img'
-            this.images = []
-            const arr = tp.split('|')
-            arr.shift()
-            this.images = arr.map(item => {
-              return `${bxdimg}/${item}`
-            })
-          }
+        let bxdimg = this.$store.getters.config.bxdimg
+        let tp = bxdInfo.tp?bxdInfo.tp : ''
+        let sp = bxdInfo.sp?bxdInfo.sp : ''
+        if (tp.trim() !== '') {
+          this.img = true
+          this.images = []
+          const arr = tp.split('|')
+          arr.shift()
+          this.images = arr.map(item => {
+            return `${bxdimg}/${item}`
+          })
+        }
+        if (sp.trim() !== '') {
+          this.video = true
+          this.videoUrl = `${bxdimg}/${sp}`
         }
 
         // 提取报修耗材
@@ -587,9 +605,9 @@
             step4()
           }
         }else if (state === 4)
-        this.bxdInfo = Object.assign({}, this.bxdInfo, {
-          step: step
-        })
+          this.bxdInfo = Object.assign({}, this.bxdInfo, {
+            step: step
+          })
 
         function step1() {
           const sbsj = me.$moment(me.bxdInfo.sbsj).format(me.format)
@@ -744,6 +762,12 @@
           })
         })
       },
+       //点击修改耗材或者添加耗材按钮
+       hcDialogShow(){
+         //清空显示的耗材列表
+         this.hc = [];
+         this.hcDialog = true
+       },
       /**
        * 取消耗材填写
        */
@@ -836,7 +860,6 @@
        * 接口读取耗材列表，显示上拉菜单
        */
       async showHcList() {
-        this.bxdInfo.hc = '';
         this.showHcListActionSheet = true
         if (!this.hclist.length) {
           await this.getHc()
@@ -1276,9 +1299,9 @@
             }
 
             .unit {
-                font-size: 28px;
-                margin-left: 5px;
-              }
+              font-size: 28px;
+              margin-left: 5px;
+            }
 
             .tel {
               position: absolute;
@@ -1353,7 +1376,7 @@
           background: rgba(244, 246, 248, 1);
           border-radius: 32px;
         }
-        
+
         .select-hc {
           max-height: 36vh;
           overflow: auto;
